@@ -15,15 +15,6 @@ TINYX_DEFINES := -DHAVE_CONFIG_H -DHAVE_DIX_CONFIG_H -DHAVE_KDRIVE_CONFIG_H \
 TINYX_OBJECTS := $(patsubst %.c,$(BUILD)/x11/%.o,$(TINYX_SOURCES))
 TINYX_HOST := $(addprefix $(BUILD)/x11/,main.o demo.o compat.o)
 
-.PHONY: tinyx
-ifeq ($(FILESYSTEM),ext2)
-tinyx: $(X11_SERVER) $(X11_APPS) $(X11_UPSTREAM) $(X11_STARTX)
-else
-tinyx:
-	@echo 'tinyx needs the ext2 profile' >&2
-	@exit 1
-endif
-
 $(TINYX_OBJECTS): $(BUILD)/x11/%.o: $(TINYX_VENDOR)/%.c $(SDK)/include/.ready $(TINYX_HEADERS) $(X11_DIR)/build.mk
 	$(Q)mkdir -p $(@D)
 	$(call quiet,CC,$@)

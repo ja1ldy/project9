@@ -2,6 +2,16 @@ Project9 dev bug log
 
 fixed
 
+- top inherited a multi second refresh interval
+  sample every half second by default and keep the user supplied delay
+
+- a parallel release build could read an incomplete x11 sdk header
+  publish each header after the copy is complete
+
+- the host build advertised separate configuration and emulator targets
+  build the bios release disk and sets with one release command
+  boot the same raw image in qemu or from supported physical media
+
 - ata flush could fail after a successful full disk test
   the driver used a fixed count of polls for completion
   slow host flushes could exhaust that count while the disk was busy

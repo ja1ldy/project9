@@ -1,4 +1,5 @@
 # Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+MAKEFLAGS += --no-builtin-rules
 PYTHON ?= python3
 ARCH ?= x86_64
 ifneq ($(ARCH),i386)
@@ -6,15 +7,12 @@ ifneq ($(ARCH),x86_64)
 $(error ARCH must be i386 or x86_64)
 endif
 endif
-ifeq ($(origin FILESYSTEM),undefined)
-FILESYSTEM := $(shell $(PYTHON) tools/ossetup.py --arch "$(ARCH)" --profile)
-endif
+FILESYSTEM ?= ext2
 PROFILE := build/$(ARCH)$(if $(filter xv6-fs,$(FILESYSTEM)),/legacy)
 BUILD := $(PROFILE)$(if $(filter x86_64,$(ARCH)),/compat-i386)
 BOOT_IMAGE := $(PROFILE)/$(if $(filter xv6-fs,$(FILESYSTEM)),xv6-legacy.img,xv6.img)
 DEFAULT_FS := $(PROFILE)/$(if $(filter xv6-fs,$(FILESYSTEM)),fs.xv6.img,install.img)
-DATA_INDEX := 2
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := .build
 
 # cross compiling e g on mac os x
 # toolprefix i386 jos elf
@@ -36,25 +34,6 @@ TOOLPREFIX := $(shell if i386-jos-elf-objdump -i 2>&1 | grep '^elf32-i386$$' >/d
 	echo "*** environment variable to that prefix and run 'make' again." 1>&2; \
 	echo "*** To turn off this error, run 'gmake TOOLPREFIX= ...'." 1>&2; \
 	echo "***" 1>&2; exit 1; fi)
-endif
-
-# if the makefile cant find qemu specify its path here
-# qemu qemu system i386
-
-# try to infer the correct qemu
-ifndef QEMU
-QEMU = $(shell if [ "$(ARCH)" = x86_64 ] && command -v qemu-system-x86_64 >/dev/null; \
-	then echo qemu-system-x86_64; exit; fi; \
-	if which qemu > /dev/null; \
-	then echo qemu; exit; \
-	elif which qemu-system-i386 > /dev/null; \
-	then echo qemu-system-i386; exit; \
-	elif which qemu-system-x86_64 > /dev/null; \
-	then echo qemu-system-x86_64; exit; \
-	else \
-	qemu=/Applications/Q.app/Contents/MacOS/i386-softmmu.app/Contents/MacOS/i386-softmmu; \
-	if test -x $$qemu; then echo $$qemu; exit; fi; fi; \
-	echo qemu-system-i386)
 endif
 
 CC = $(TOOLPREFIX)gcc
@@ -120,9 +99,6 @@ SMALL_LINK_WARNINGS := $(shell $(LD) --help 2>/dev/null | \
 endif
 SMALL_LINK = $(LINK) -N $(SMALL_LINK_WARNINGS)
 vpath %.c usr/bin usr/tests usr/init
-
-.PHONY: all clean stage-rootfs fsck reset-fs migrate-fs qemu qemu-nox qemu-gdb qemu-nox-gdb qemu-memfs bochs
-all: $(BOOT_IMAGE) $(DEFAULT_FS) libc
 
 $(BUILD)/%.o: %.c
 	$(Q)mkdir -p $(@D)
@@ -321,8 +297,7 @@ $(PROFILE)/fat/[: $(PROFILE)/fat/test
 
 .SECONDARY: $(ULIB64) $(USER64_OBJECTS) $(addprefix $(WIDE)/bin/,$(USER_PROGRAMS))
 
-.PHONY: boot-options
-$(BUILD)/boot-options: boot-options
+$(BUILD)/boot-options: .force
 	$(Q)mkdir -p $(@D)
 	$(Q)printf '%s\n' '$(BOOT64)' > $@.tmp
 	$(Q)cmp -s $@.tmp $@ || cp $@.tmp $@
@@ -350,11 +325,9 @@ MKE2FS ?= mke2fs
 E2FSCK ?= e2fsck
 DEBUGFS ?= debugfs
 
-FS_IMAGE ?= $(DEFAULT_FS)
 ROOT_MIB ?= 512
 RELEASE_ROOT_MIB ?= 32
 ROOT_BLOCK ?= 1024
-RAM ?= 512
 ROOT_IMAGE = $(PYTHON) tools/osimage.py --size $(ROOT_MIB) --block $(ROOT_BLOCK) \
              --mke2fs "$(MKE2FS)" --e2fsck "$(E2FSCK)" --debugfs "$(DEBUGFS)" --filesystem $(FILESYSTEM)
 
@@ -367,27 +340,6 @@ $(BUILD)/legacy-fsck: tools/fsck.c include/legacyfs.h include/fscheck.h include/
 	$(Q)mkdir -p $(@D)
 	$(call quiet,HOSTCC,$@)
 	$(Q)$(HOSTCC) -idirafter include -Wall -Wextra -o $@ $<
-
-fsck: $(LEGACY_CHECK)
-	$(call quiet,FSCK,$(FS_IMAGE))
-	$(Q)$(if $(LEGACY_CHECK),$(LEGACY_CHECK),$(PYTHON) tools/installimage.py --check --e2fsck "$(E2FSCK)") "$(FS_IMAGE)"
-
-migrate-fs:
-	$(Q)$(PYTHON) tools/ossetup.py --arch "$(ARCH)" --prepare --migrate --make "$(MAKE)" \
-	  --mke2fs "$(MKE2FS)" --e2fsck "$(E2FSCK)" --debugfs "$(DEBUGFS)"
-
-.PHONY: os menuconfig defconfig
-menuconfig:
-	$(Q)$(PYTHON) tools/ossetup.py --arch "$(ARCH)" --configure
-
-os:
-	$(Q)$(PYTHON) tools/ossetup.py --arch "$(ARCH)" --make "$(MAKE)" --qemu "$(QEMU)" \
-	  --mke2fs "$(MKE2FS)" --e2fsck "$(E2FSCK)" --debugfs "$(DEBUGFS)" $(OS_ARGS)
-
-defconfig:
-	$(Q)$(PYTHON) tools/ossetup.py --arch "$(ARCH)" --defconfig
-
-stage-rootfs: $(ROOTFS)
 
 # build a fresh tree so removed files cannot linger in the image
 ifdef X11_SERVER
@@ -436,8 +388,7 @@ $(BUILD)/LICENSE: LICENSE Documentation/V6-license.txt Documentation/Gallant-lic
 	$(Q)cat $^ > $@
 
 # rebuild the factory when its geometry changes
-.PHONY: root-options
-$(BUILD)/root-options: root-options
+$(BUILD)/root-options: .force
 	$(Q)mkdir -p $(@D)
 	$(Q)printf '%s %s\n' '$(ROOT_MIB)' '$(ROOT_BLOCK)' > "$@.tmp"
 	$(Q)if cmp -s "$@" "$@.tmp"; then rm "$@.tmp"; else mv "$@.tmp" "$@"; fi
@@ -458,12 +409,6 @@ $(DEFAULT_FS): $(BOOT_IMAGE) tools/installimage.py | $(BUILD)/fs.factory.img
 	else $(PYTHON) tools/installimage.py "$@" "$(BOOT_IMAGE)" "$(BUILD)/fs.factory.img"; fi
 endif
 
-reset-fs: $(BUILD)/fs.factory.img $(BOOT_IMAGE)
-	$(call quiet,IMAGE,$(DEFAULT_FS))
-	$(Q)test ! -e $(DEFAULT_FS) || ln $(DEFAULT_FS) $(DEFAULT_FS).reset-backup
-	$(Q)$(if $(LEGACY_CHECK),cp "$(BUILD)/fs.factory.img" "$(DEFAULT_FS).tmp",$(PYTHON) tools/installimage.py "$(DEFAULT_FS).tmp" "$(BOOT_IMAGE)" "$(BUILD)/fs.factory.img")
-	$(Q)mv $(DEFAULT_FS).tmp $(DEFAULT_FS)
-
 .PRECIOUS: $(BUILD)/%.o $(BUILD)/user/%.o
 .SECONDARY: $(ULIB)
 -include $(shell test ! -d $(PROFILE) || find $(PROFILE) -path '$(PROFILE)/legacy' -prune -o -name '*.d' -print)
@@ -474,49 +419,9 @@ clean:
 	  ! -name project9.json ! -name "$(notdir $(DEFAULT_FS)).reset-backup" $(if $(filter xv6-fs,$(FILESYSTEM)),,! -name legacy) \
 	  -exec rm -rf {} + 2>/dev/null || test ! -d "$(PROFILE)"
 
-# try to generate a unique gdb port
-GDBPORT = $(shell expr `id -u` % 5000 + 25000)
-# qemus gdb stub command line changed in 0 11
-QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
-	then echo "-gdb tcp::$(GDBPORT)"; \
-	else echo "-s -p $(GDBPORT)"; fi)
-ifndef CPUS
-CPUS := 2
-endif
-ifeq ($(FILESYSTEM),xv6-fs)
-QEMU_DISKS = -drive file="$(BOOT_IMAGE)",index=0,media=disk,format=raw -drive file="$(FS_IMAGE)",index=1,media=disk,format=raw
-else
-QEMU_DISKS = -drive file="$(FS_IMAGE)",index=0,media=disk,format=raw
-endif
-QEMUOPTS = $(QEMU_DISKS) -smp $(CPUS) -m $(RAM) $(QEMUEXTRA) $(if $(DATA_IMAGE),-drive file="$(DATA_IMAGE)",index=$(DATA_INDEX),media=disk,format=raw)
-
-qemu qemu-nox qemu-memfs: $(FS_IMAGE) $(BOOT_IMAGE)
-	$(call quiet,QEMU,$@)
-	$(Q)$(QEMU) $(if $(filter qemu-nox,$@),-display none) $(if $(filter qemu-memfs,$@),-snapshot) -serial mon:stdio $(QEMUOPTS)
-
-bochs: $(FS_IMAGE) $(BOOT_IMAGE)
-	$(call quiet,BOCHS,$@)
-ifeq ($(FILESYSTEM),xv6-fs)
-	$(Q)sed 's|path="xv6.img"|path="$(BOOT_IMAGE)"|; s|path="fs.img"|path="$(FS_IMAGE)"|' tools/debug/dot-bochsrc > $(PROFILE)/.bochsrc
-else
-	$(Q)sed '/^ata0-slave:/d; s|^ata0-master:.*|ata0-master: type=disk, mode=flat, path="$(FS_IMAGE)"|' tools/debug/dot-bochsrc > $(PROFILE)/.bochsrc
-endif
-	$(Q)bochs -q -f $(PROFILE)/.bochsrc
-
-$(PROFILE)/.gdbinit: tools/debug/.gdbinit.tmpl
-	$(call quiet,GEN,$@)
-	$(Q)sed -e "s/localhost:1234/localhost:$(GDBPORT)/" -e 's|build/kernel.elf|$(BUILD)/kernel.elf|g' < $^ > $@
-
-qemu-gdb: $(FS_IMAGE) $(BOOT_IMAGE) $(PROFILE)/.gdbinit
-	@echo "*** Now run 'gdb -x $(PROFILE)/.gdbinit'." 1>&2
-	$(call quiet,QEMU,$@)
-	$(Q)$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
-
-qemu-nox-gdb: $(FS_IMAGE) $(BOOT_IMAGE) $(PROFILE)/.gdbinit
-	@echo "*** Now run 'gdb -x $(PROFILE)/.gdbinit'." 1>&2
-	$(call quiet,QEMU,$@)
-	$(Q)$(QEMU) -display none -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
-
+full-clean:
+	$(call quiet,CLEAN,build release)
+	$(Q)rm -rf build release
 
 $(BUILD)/bin/[: $(BUILD)/bin/test
 	$(call quiet,COPY,$@)
@@ -552,8 +457,7 @@ SDK_CFLAGS = -nostdinc -I$(SDK)/include -isystem $(shell $(CC) -print-file-name=
   $(filter-out -Iinclude -mgeneral-regs-only,$(CFLAGS)) -ffunction-sections -fdata-sections
 SDK_COMPAT := $(shell find usr/libc/compat -type f)
 
-.PHONY: libc
-libc: $(SDK)/libc.a $(SDK)/libm.a $(SDK)/crt0.o $(SDK)/user.ld $(SDK)/NetBSD-LICENSES.txt
+SDK_FILES := $(SDK)/libc.a $(SDK)/libm.a $(SDK)/crt0.o $(SDK)/user.ld $(SDK)/NetBSD-LICENSES.txt
 
 $(SDK)/include/.ready: $(SDK_PUBLIC) $(addprefix include/,$(SDK_NATIVE)) include/termios.h include/setjmp.h
 	$(Q)mkdir -p $(SDK)/include/project9
@@ -607,7 +511,6 @@ $(BUILD)/usr/libc/vendor/%.o: usr/libc/vendor/%.S $(SDK_COMPAT)
 -include $(SDK_OBJECTS:.o=.d) $(SDK_NETBSD:.o=.d)
 
 
-.PHONY: libc-test qemu-libc-test
 ifeq ($(FILESYSTEM),xv6-fs)
 SDK_TEST_DISK := $(BUILD)/libc-test.img
 else
@@ -616,13 +519,6 @@ $(BUILD)/libc-install.img: $(BOOT_IMAGE) $(BUILD)/libc-test.img tools/installima
 	$(call quiet,IMAGE,$@)
 	$(Q)$(PYTHON) tools/installimage.py "$@" "$(BOOT_IMAGE)" "$(BUILD)/libc-test.img"
 endif
-
-libc-test: $(BOOT_IMAGE) $(SDK_TEST_DISK)
-
-qemu-libc-test: FS_IMAGE = $(SDK_TEST_DISK)
-qemu-libc-test: libc-test
-	$(call quiet,QEMU,$@)
-	$(Q)$(QEMU) -serial mon:stdio $(QEMUOPTS)
 
 NETBSD_TESTS := $(addprefix $(BUILD)/,bsdregex bsdnumber bsdtime)
 SDK_TESTS := $(BUILD)/libctest $(NETBSD_TESTS)
@@ -647,33 +543,12 @@ $(BUILD)/libc-test.img: $(ROOTFS) tools/osimage.py tools/legacyimage.py $(BUILD)
 	$(Q)cp $(SDK_TESTS) usr/libc/tests/netbsdtest $(BUILD)/libc-test-root/bin/
 	$(Q)$(ROOT_IMAGE) --stage "$(BUILD)/libc-test-root" "$@"
 
-.PHONY: fsck-ext2
-fsck-ext2: fsck
-
-
-.PHONY: release
-release: ROOT_MIB = $(RELEASE_ROOT_MIB)
-RELEASEDIR ?= release/dev-$(ARCH)
-ifeq ($(FILESYSTEM),xv6-fs)
-release:
-	$(Q)$(MAKE) FILESYSTEM=ext2 RELEASEDIR="$(RELEASEDIR)" release
-else
-release: stage-rootfs libc $(BOOT_IMAGE) $(BUILD)/fs.factory.img
-	$(call quiet,RELEASE,$(RELEASEDIR))
-	$(Q)$(PYTHON) tools/release.py "$(RELEASEDIR)" --stage "$(BUILD)" --boot "$(BOOT_IMAGE)" $(if $(KERNEL64),--universal) --mke2fs "$(MKE2FS)" --debugfs "$(DEBUGFS)" --e2fsck "$(E2FSCK)"
-endif
-
 $(BUILD)/userhash.o: kernel/sha256.c
 	$(Q)mkdir -p $(@D)
 	$(call quiet,CC,$@)
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
 $(BUILD)/bin/sha256: $(BUILD)/userhash.o
-
-.PHONY: storage-test
-storage-test: release
-	$(Q)$(PYTHON) tools/storage-test.py $(if $(KERNEL64),--x86-64) --media "$(RELEASEDIR)/install.img" \
-	  --qemu "$(QEMU)" --e2fsck "$(E2FSCK)" --debugfs "$(DEBUGFS)" --python "$(PYTHON)"
 
 include usr/x11/build.mk
 include usr/x11/fvwm/build.mk
@@ -683,3 +558,17 @@ include usr/curses/build.mk
 include usr/top/build.mk
 
 include usr/editors/build.mk
+
+.PHONY: .build .force release clean full-clean
+.build: $(BOOT_IMAGE) $(DEFAULT_FS) $(SDK_FILES) $(if $(filter 1,$(SDK_TEST)),$(SDK_TEST_DISK))
+
+release: ROOT_MIB = $(RELEASE_ROOT_MIB)
+RELEASEDIR ?= release/dev-$(ARCH)
+ifeq ($(FILESYSTEM),xv6-fs)
+release:
+	$(Q)$(MAKE) FILESYSTEM=ext2 RELEASEDIR="$(RELEASEDIR)" release
+else
+release: $(SDK_FILES) $(BOOT_IMAGE) $(BUILD)/fs.factory.img
+	$(call quiet,RELEASE,$(RELEASEDIR))
+	$(Q)$(PYTHON) tools/release.py "$(RELEASEDIR)" --stage "$(BUILD)" --boot "$(BOOT_IMAGE)" $(if $(KERNEL64),--universal) --mke2fs "$(MKE2FS)" --debugfs "$(DEBUGFS)" --e2fsck "$(E2FSCK)"
+endif

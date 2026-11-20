@@ -45,10 +45,8 @@ Run `man 5 dev` for the interfaces.
 
 ## Install
 
-Quit QEMU, copy your working `fs.img` into the new tree, and run
-`make update-fs` followed by `make qemu`. The update installs the new
-init, user programs and manuals and keeps the previous image as
-`fs.pre-dev.img`.
+Boot a fresh image using the [release guide](release.md). To import a
+previous disk, see the [ext2 migration guide](ext2.md#migrate-a-previous-installation).
 
 The QEMU tests cover BIOS boot, ATA, AHCI, USB storage, and ACPI
 shutdown. Physical ThinkPad validation is pending. The boot path

@@ -12,8 +12,6 @@ $(XORG_APPS_BUILD)/xinit/xinit.o: XORG_APP_FLAGS += -D_POSIX_SOURCE -DRETSIGTYPE
 XORG_APP_SRC := $(foreach app,$(XORG_APP_NAMES),$(wildcard $(XORG_APPS_VENDOR)/$(app)/*.c))
 XORG_APP_OBJS := $(patsubst $(XORG_APPS_VENDOR)/%.c,$(XORG_APPS_BUILD)/%.o,$(XORG_APP_SRC))
 
-.PHONY: xorg-apps
-xorg-apps: $(X11_UPSTREAM) $(X11_STARTX)
 
 $(XORG_APP_OBJS): $(XORG_APPS_BUILD)/%.o: $(XORG_APPS_VENDOR)/%.c $(SDK)/include/.ready $(FVWM_BUILD)/include/X11/Xpoll.h $(XORG_APPS_DIR)/build.mk
 	$(Q)mkdir -p $(@D)

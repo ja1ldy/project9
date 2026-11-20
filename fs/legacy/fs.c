@@ -192,7 +192,7 @@ iinit(int dev)
 
   readsb(dev, &sb);
   if(!fsgeometry(&sb))
-    panic("invalid filesystem layout run make fsck on the host");
+    panic("invalid filesystem layout run the legacy fsck on the host");
   cprintf("sb: size %d nblocks %d ninodes %d nlog %d logstart %d\
  inodestart %d bmap start %d\n", sb.size, sb.nblocks,
           sb.ninodes, sb.nlog, sb.logstart, sb.inodestart,

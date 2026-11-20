@@ -35,6 +35,7 @@ sha256sum -c SHA256SUMS
 
 ## Live boot and installation
 
+Use `install.img` from this release for either QEMU or a physical PC.
 Copy the release image before using it as a writable VM disk.
 
 ```sh
@@ -48,6 +49,12 @@ In live mode the BIOS reads the partition before the kernel starts.
 System changes then last for the session. Live mode accepts an ext2
 partition up to 64 MiB and needs contiguous memory for the image plus
 the kernel and working memory.
+
+On a physical PC, use a disk imaging tool to write `install.img` as a
+raw image to the whole boot device. This overwrites the selected device.
+Select the device in the firmware boot menu with legacy BIOS boot
+enabled. For USB media, choose **Live in memory**. A supported ATA or
+AHCI disk can also use **Boot Project9** for persistent storage.
 
 For the in-guest test installer and its disposable disk workflow, see
 [Project9 dev installer test](installer.md).

@@ -2,12 +2,12 @@
 
 # Project9 libc with NetBSD sources
 
-`make libc` builds an i386 SDK in `build/x86_64/compat-i386/sdk`. It contains `libc.a`,
+`make` builds an i386 SDK in `build/x86_64/compat-i386/sdk`. It contains `libc.a`,
 `libm.a`, the public headers, `crt0.o`, and the linker script. Build an
 application with the same GCC and binutils prefix used to build Project9.
 
 ```sh
-make libc
+make
 gcc -m32 -march=i486 -ffreestanding -fno-pie -fno-stack-protector \
     -ffunction-sections -fdata-sections -Ibuild/x86_64/compat-i386/sdk/include \
     -c hello.c -o hello.o
@@ -75,11 +75,13 @@ See the [desktop guide](desktop.md) for the supported kernel interfaces.
 On the host, run
 
 ```sh
-make qemu-libc-test
+make SDK_TEST=1
+qemu-system-x86_64 -m 512 -serial mon:stdio \
+  -drive file=build/x86_64/compat-i386/libc-install.img,format=raw
 ```
 
-The target builds and boots `build/x86_64/compat-i386/libc-test.img`. The test disk has its
-own root password. Set it on the first boot, sign in as root, and run
+The test disk has its own root password. Set it on the first boot, sign
+in as root, and run
 
 ```sh
 libctest
@@ -90,5 +92,4 @@ Expect `LIBC TESTS PASSED` and `NETBSD LIBC TESTS PASSED`. The first
 suite checks the existing kernel and libc interfaces, including the
 framebuffer. The second checks the imported routines, including regex
 captures, decimal rounding, leap dates and text formatting. Use the
-default QEMU display device for the framebuffer check. `make libc-test`
-builds just the images. `make qemu` boots the regular `fs.img`.
+default QEMU display device for the framebuffer check.

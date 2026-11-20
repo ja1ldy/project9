@@ -2,8 +2,8 @@
 
 # BIOS boot menu
 
-Run `make qemu` to see the Project9 heading, framed menu and supplied
-logo. Use the numbered keys, or highlight an item with the arrow keys
+Boot the [release image](release.md) to see the Project9 heading, framed
+menu and supplied logo. Use the numbered keys, or highlight an item with the arrow keys
 and press Enter. Press 5 for the RAM-live session. Moving the highlight stops the three-second countdown.
 Space pauses or resumes it. Escape opens the loader prompt and R
 restarts the machine.
@@ -11,7 +11,8 @@ restarts the machine.
 At the loader prompt, `boot` starts Project9, `menu` returns to the menu,
 `live` boots a temporary RAM root, `boot64` starts the x86_64 kernel,
 `live64` starts it with a RAM root, and `reboot` restarts the machine. `help` lists the commands.
-`make qemu-nox` presents the numbered keys and prompt over serial. Both the
+`-display none -serial mon:stdio` presents the numbered keys and prompt
+over QEMU's serial console. Both the
 menu and the guest console use 9600 baud on a hardware serial connection.
 
 The video menu prefers 640 by 480 with a banked VBE framebuffer. It falls
@@ -93,4 +94,4 @@ partition on ATA or AHCI storage. In live mode the loader copies the
 partition into reserved RAM before entering the kernel.
 
 See the [release and installation guide](release.md) for writing the
-image to USB or disk. Run `make os` to import a previous `fs.img`.
+image to USB or disk and the [ext2 guide](ext2.md) for importing a previous `fs.img`.

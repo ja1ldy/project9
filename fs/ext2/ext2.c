@@ -371,7 +371,7 @@ ext2init(void)
   if(attach(ROOTDEV) != 1)
     panic("root ext2 unavailable or invalid check the disk image offline");
   if(!system->writable)
-    panic("root ext2 needs an offline check run make fsck");
+    panic("root ext2 needs an offline check with tools/installimage.py");
 
   // protect the account inode by its identity so aliases cannot bypass it
   root = iget(ROOTDEV, ROOTINO);

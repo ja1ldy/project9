@@ -306,5 +306,5 @@ class Menu:
 
 def menu(setup, configure=False):
     if curses is None or not sys.stdin.isatty() or not sys.stdout.isatty() or os.environ.get("TERM") in (None, "", "dumb"):
-        raise ValueError("Use a color terminal with ncurses or run make defconfig and make os OS_ARGS=--boot.")
+        raise ValueError("Use a color terminal with ncurses or run tools/ossetup.py with --boot.")
     return curses.wrapper(lambda screen: Menu(screen, setup, configure).main())

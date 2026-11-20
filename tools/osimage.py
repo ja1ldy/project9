@@ -266,7 +266,7 @@ def build_image(output, stage, size, block, mkfs, fsck, legacy_check=None,
 
 def checked_root(path, filesystem="ext2"):
     if image_kind(path) != ("ext2" if filesystem == "ext2" else "legacy"):
-        raise ValueError(f"{path} does not match the {filesystem} profile. Run make os")
+        raise ValueError(f"{path} does not match the {filesystem} profile")
 
 
 def main():

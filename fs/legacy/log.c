@@ -68,7 +68,7 @@ initlog(int dev)
   initlock(&log.lock, "log");
   readsb(dev, &sb);
   if(!fsgeometry(&sb))
-    panic("invalid journal geometry run make fsck on the host");
+    panic("invalid journal geometry run the legacy fsck on the host");
   log.sb = sb;
   log.start = sb.logstart;
   log.size = sb.nlog;
@@ -101,14 +101,14 @@ read_head(void)
   int i, j;
 
   if(lh->n < 0 || lh->n > LOGSIZE || lh->n >= log.size)
-    panic("invalid journal count run make fsck on the host");
+    panic("invalid journal count run the legacy fsck on the host");
   log.lh.n = lh->n;
   for(i = 0; i < log.lh.n; i++){
     if(!journalentry(&log.sb, lh->block[i]))
-      panic("invalid journal target run make fsck on the host");
+      panic("invalid journal target run the legacy fsck on the host");
     for(j = 0; j < i; j++)
       if(lh->block[j] == lh->block[i])
-        panic("duplicate journal target run make fsck on the host");
+        panic("duplicate journal target run the legacy fsck on the host");
     log.lh.block[i] = lh->block[i];
   }
   brelse(buf);

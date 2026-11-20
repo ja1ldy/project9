@@ -15,16 +15,10 @@ FVWM_OBJS := $(patsubst $(FVWM_OPENBSD)/%.c,$(FVWM_BUILD)/openbsd/%.o,$(wildcard
 FVWM_LOCALE_OBJS := $(patsubst $(FVWM_XLIB)/src/xlibi18n/%.c,$(FVWM_BUILD)/locale/%.o,$(wildcard $(FVWM_XLIB)/src/xlibi18n/*.c))
 FVWM_PORT_OBJS := $(addprefix $(FVWM_BUILD)/,xtransport.o compat.o colors.o)
 
-.PHONY: fvwm x11-sdk
-fvwm: $(FVWM_PROGRAM)
-x11-sdk: $(SDK)/libX11.a
-
 X11_SDK_FROM_LIB := Xlib.h Xresource.h Xutil.h cursorfont.h
 X11_SDK_FROM_PROTO := X.h Xatom.h Xfuncproto.h Xfuncs.h Xmd.h Xosdefs.h keysym.h keysymdef.h
 X11_SDK_HEADERS := $(addprefix $(SDK)/include/X11/,$(X11_SDK_FROM_LIB) $(X11_SDK_FROM_PROTO))
-libc: x11-sdk
-
-x11-sdk: $(X11_SDK_HEADERS) $(SDK)/X11-LICENSES.txt
+SDK_FILES += $(SDK)/libX11.a $(X11_SDK_HEADERS) $(SDK)/X11-LICENSES.txt
 
 $(SDK)/X11-LICENSES.txt: $(FVWM_XLIB)/COPYING $(wildcard $(FVWM_PROTO)/../COPYING-*)
 	$(Q)mkdir -p $(@D)
@@ -32,11 +26,13 @@ $(SDK)/X11-LICENSES.txt: $(FVWM_XLIB)/COPYING $(wildcard $(FVWM_PROTO)/../COPYIN
 
 $(addprefix $(SDK)/include/X11/,$(X11_SDK_FROM_LIB)): $(SDK)/include/X11/%: $(FVWM_XLIB)/include/X11/%
 	$(Q)mkdir -p $(@D)
-	$(Q)cp $< $@
+	$(Q)cp $< $@.tmp
+	$(Q)mv $@.tmp $@
 
 $(addprefix $(SDK)/include/X11/,$(X11_SDK_FROM_PROTO)): $(SDK)/include/X11/%: $(FVWM_PROTO)/X11/%
 	$(Q)mkdir -p $(@D)
-	$(Q)cp $< $@
+	$(Q)cp $< $@.tmp
+	$(Q)mv $@.tmp $@
 
 $(SDK)/libX11.a: $(FVWM_BUILD)/libX11.a
 	$(Q)mkdir -p $(@D)

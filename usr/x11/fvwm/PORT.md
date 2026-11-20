@@ -20,6 +20,6 @@ disabled. Project9's `xtransport.c` connects it to the local X11
 socket for display zero. The upstream copyright notices are in
 [vendor/libX11/COPYING](vendor/libX11/COPYING).
 
-Use `make fvwm` with the ext2 profile to build the window manager.
+The standard ext2 build includes the window manager.
 Release builds package the executable and `/etc/fvwmrc` into the
 staged root. The executable uses the i386 user ABI on both images.

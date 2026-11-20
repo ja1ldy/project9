@@ -31,20 +31,9 @@ SYNOPSIS to show the accepted invocation, DESCRIPTION to explain what
 it does, and SEE ALSO to point to related pages. Document options and
 exit statuses only where the command supports them.
 
-## Install on an existing disk
+## Install the current manual pages
 
-Quit QEMU and copy your current `fs.img` into the newly extracted
-`project9` directory. Then run on the host:
-
-```sh
-make update-fs
-make qemu
-```
-
-The updater installs the current programs and manual pages and saves the
-original disk as `fs.pre-dev.img`. Your accounts, passwords and other
-files stay on the updated disk. The pager uses a new system call, so use
-the updated kernel with the updated programs.
-
-For a fresh disk, run `make qemu` in the extracted directory without
-copying in an old `fs.img`.
+The current programs and manual pages are included in a fresh
+`make release` image. Use the matching kernel when testing the pager.
+See the [ext2 guide](ext2.md#migrate-a-previous-installation) for importing
+an earlier disk.

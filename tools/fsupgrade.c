@@ -404,7 +404,7 @@ load(int fd, int inspect, int refresh)
   if(sb.magic == FS_MAGIC && !refresh)
     fail("the input already uses the v0.2 disk format");
   if(sb.magic != FS_MAGIC && refresh)
-    fail("run make migrate-fs to upgrade a v0.1 disk");
+    fail("use a previous Project9 release to upgrade a v0.1 disk");
   if(*(uint*)sector(sb.logstart) != 0)
     fail("the journal is pending, boot the old kernel and shut it down first");
   inodes = sector(sb.inodestart);

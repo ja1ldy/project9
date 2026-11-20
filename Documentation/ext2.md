@@ -9,7 +9,7 @@ empty.
 
 ## Set up a disk
 
-Run `make os` in a terminal. The setup menu uses ncurses. Configure the root size and block size, virtual
+Run `python3 tools/ossetup.py` in a terminal. The setup menu uses ncurses. Configure the root size and block size, virtual
 CPU count, guest RAM, display, and optional data image. Settings are
 saved in `build/<arch>/project9.json`. New filesystem
 settings apply at creation or migration.
@@ -17,9 +17,11 @@ settings apply at creation or migration.
 Choose **Start Project9** to build and boot or **Build the boot and root
 images** to build offline. Creating and migrating images requires Python
 3.9 or later and e2fsprogs with `mke2fs`, `debugfs`, and `e2fsck`.
-For unattended builds use `make os OS_ARGS=--prepare`.
+For unattended setup use `python3 tools/ossetup.py --prepare`.
 
-The default root is 32 MiB with 1 KiB blocks. A fresh disk uses a root password set in setup or prompts for one at first boot. Select an existing separate
+The release root is 32 MiB and a new local disk defaults to 512 MiB.
+Both use 1 KiB blocks by default. A fresh disk uses a root password set
+in setup or prompts for one at first boot. Select an existing separate
 ext2 image in the wizard to use an earlier `/ext2` data disk.
 
 ## Migrate a previous installation
@@ -33,10 +35,11 @@ release before this step.
 
 ## Check a disk
 
-With QEMU stopped, choose **Check disks** or run `make fsck`. The latter
-extracts and checks the root partition of `install.img` by default. For another image use
-`make fsck FS_IMAGE=path/to/disk.img`. The wizard also checks a configured
-data image. Both use `e2fsck -fn` for a read-only inspection.
+With QEMU stopped, choose **Check disks** or run
+`python3 tools/installimage.py --check path/to/disk.img`. The tool checks
+the root partition of an install image or a standalone ext2 image.
+The setup menu also checks a configured data image. Both use `e2fsck -fn`
+for a read-only inspection.
 
 Ext2 has no journal. Project9 flushes the dirty flag before changing the
 filesystem. Ordinary writes send data and metadata to the disk controller.

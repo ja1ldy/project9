@@ -16,13 +16,14 @@ The `forktest`, `stressfs`, and `zombie` sources are in the separate
 `Project9-test-backup.zip` archive.
 
 For the development stability suite, run `stability` in a quiet guest
-using a disposable disk. After shutting down, check that image with
-`make fsck`. See [stability and recovery](stability.md) for expected
+using a disposable disk. After shutting down, check that image offline.
+See [stability and recovery](stability.md) for expected
 results and crash diagnostics.
 
 ## Reproduce the interactive checks
 
-1. Run `make` and `make qemu` with a fresh data disk. Set the root password
+1. Build a fresh image with `make release` and boot a copy in QEMU using
+   the [release guide](release.md). Set the root password
    and sign in. Run `pwd`, `id` and `whoami`.
 2. Run `echo xyz | tr a-z A-Z | tee /tmp/sample`, then
    `stat /tmp/sample` and `cat /tmp/sample`. Check the pipelines
@@ -47,7 +48,8 @@ results and crash diagnostics.
    a private directory under `/tmp` and removes its test files when it
    finishes. It should print `ALL TESTS PASSED` and return status 0.
    Run it again on the same image to check that cleanup worked. After
-   stopping the guest, run `make fsck` on the disk used in the test.
+   stopping the guest, run `python3 tools/installimage.py --check` with
+   the path to the disk used in the test.
 9. Run `printf '\033[31mRED\033[0m\n'` in the graphical console. Only
    the word RED should appear in red. Then run `printf '\x1b[2J\x1b[H'`
    to clear the display and return the cursor to the top left.

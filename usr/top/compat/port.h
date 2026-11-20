@@ -9,6 +9,7 @@
 #define CPUSTATES 1
 #define RT_TABLEID_MAX 255
 #define OXTABS 0
+#define Default_DELAY 0.5
 
 long long strtonum(const char *, long long, long long, const char **);
 size_t strlcat(char *, const char *, size_t);

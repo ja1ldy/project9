@@ -25,7 +25,7 @@ Linux kernel source tree where they suit this small xv6 system.
 ## From source to guest disk
 
 `rootfs/` is the directory template. Empty directories have a `.keep`
-file so they survive a source checkout. Run `make stage-rootfs` to assemble
+file so they survive a source checkout. Run `make` to assemble
 `build/x86_64/compat-i386/rootfs/` with the compiled binaries and static files. The build
 omits `.keep` files from the staged tree.
 
@@ -34,12 +34,13 @@ into the hybrid guest's `/bin`. The standalone i386 profile stages ELF32 executa
 hierarchy into `build/x86_64/compat-i386/fs.factory.img` and initializes the protected
 account database there. Init creates `/dev/console` on first boot.
 
-The VM uses its writable `fs.img` as the guest disk. The default shell
+The VM can use `build/x86_64/install.img` as the local writable guest disk. The default shell
 `PATH` is `/bin`. If root runs `rm /bin/ls`, `ls` stops resolving on
 that disk and stays absent across a reboot. For a reversible test, move
 it to `/tmp/ls.saved` first and move it back afterward. A fresh factory
 image includes the staged `ls` again. A normal source build preserves
-the existing `fs.img`.
+the contents of the existing guest filesystem. A fresh release includes the
+current staged files.
 
 | Guest path | Contents |
 | --- | --- |

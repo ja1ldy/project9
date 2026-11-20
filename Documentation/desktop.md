@@ -84,9 +84,9 @@ for the old tick-based behavior.
 
 ## Writable disks
 
-`make os` defaults to a 512 MiB root for a new writable ext2 disk.
-Existing configurations and disks retain their size. Select a new root
-size in the settings or create a fresh disk. Use the disk boot option
+`make` defaults to a 512 MiB root for a new writable ext2 disk.
+Existing disks retain their size. Set `ROOT_MIB` when building a fresh
+local disk to choose a different size. Use the disk boot option
 on a 512 MiB image. The distribution image uses a separate small root
 so the RAM-live options fit in memory.
 
@@ -132,13 +132,13 @@ inside X, run `xterm -version` to see the upstream version.
 Run `stty -a` in xterm to see the PTY dimensions. Type `exit` in the shell
 to close the window.
 
-`make x11-sdk` builds `libX11.a` and installs the public X11 headers
+`make` builds `libX11.a` and installs the public X11 headers
 into the architecture's SDK. The release includes both in
 `sdk.tar.gz`. Build an Xlib client with the SDK's i386 compiler
 flags and link `crt0.o`, the client object and `libX11.a` before
 `libc.a` and `libm.a` in a linker group. Use the SDK's
 `user.ld` as the linker script. For example, from the source directory
-after `make ARCH=i386 x11-sdk libc`:
+after `make ARCH=i386`:
 
 ```sh
 sdk=build/i386/sdk
@@ -184,6 +184,8 @@ monitor. Its Project9 backend uses the process snapshot syscall and
 reports online CPUs, free memory and uptime. CPU usage counters and
 load averages are unavailable. Use `top -b -d 1` for one plain-text
 snapshot or `top` in a VT100-style terminal for the interactive view.
+The default refresh interval is half a second. Use `top -s 2` to sample
+every two seconds.
 
 The SDK includes a narrow `libcurses.a` with window and cursor operations,
 basic attributes, screen updates, input and resize. It follows the public

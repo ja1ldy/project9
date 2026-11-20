@@ -99,7 +99,7 @@ class Setup:
         pending = self.pending[self.filesystem]
         hostname = self.config["hostname"]
         if migrate and not (self.args.migrate or source in self.confirmed):
-            raise ValueError("Approve conversion in make os or use OS_ARGS='--prepare --migrate'.")
+            raise ValueError("Approve conversion in the setup menu or pass --prepare --migrate.")
         stage = self.build / "rootfs"
         legacy_check = self.build / "legacy-fsck"
         if action == "apply" and (not installed or migrate):
@@ -110,7 +110,7 @@ class Setup:
             self.ext2_tools()
         targets = [self.boot_image]
         if not exists or migrate:
-            targets.append("stage-rootfs")
+            targets.append(stage)
         if migrate:
             targets.append(legacy_check)
         self.make(*targets)
@@ -161,7 +161,7 @@ class Setup:
         hostname = self.config["hostname"]
         if not exists and action == "apply":
             raise ValueError("Select Build or Start to create the root disk first.")
-        self.make(*([self.boot_image, checker, "stage-rootfs"] if not exists else
+        self.make(*([self.boot_image, checker, stage] if not exists else
                     [self.boot_image, checker]))
         if not exists or copying or pending or hostname:
             if exists:
@@ -230,11 +230,14 @@ def main():
     parser.add_argument("--arch", choices=("i386", "x86_64"), default="x86_64")
     parser.add_argument("--migrate", action="store_true")
     parser.add_argument("--make", default="make")
-    parser.add_argument("--qemu", default="qemu-system-i386")
+    parser.add_argument("--qemu")
     parser.add_argument("--mke2fs", default="mke2fs")
     parser.add_argument("--e2fsck", default="e2fsck")
     parser.add_argument("--debugfs", default="debugfs")
     args = parser.parse_args()
+    if args.qemu is None:
+        args.qemu = (shutil.which(f"qemu-system-{args.arch}") or
+                     shutil.which("qemu-system-x86_64") or "qemu-system-i386")
     setup = Setup(args)
     if args.action == "defconfig":
         defconfig(setup)

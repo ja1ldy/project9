@@ -7,9 +7,10 @@ label applies to the system and boot menu.
 
 ## Check a disk image
 
-Stop QEMU and then choose **Check disks** in `make os`, or run
-`make fsck`. These run `e2fsck -fn` without changing the image.
-Use `make fsck FS_IMAGE=path/to/copy.img` to check another volume.
+Stop QEMU, then run
+`python3 tools/installimage.py --check build/x86_64/install.img`.
+Pass another image path to check another volume. The command uses
+`e2fsck -fn` without changing the image.
 
 Ext2 records an unclean state while changes are pending. A failed write
 or flush returns an I/O error from `sync`, `umount`, and shutdown. A
@@ -47,7 +48,7 @@ checks, malformed exec arguments and headers, read-only page faults,
 private mappings across fork, and credential isolation. On a fresh
 installer test disk, `stability inodes` checks inode exhaustion and reuse.
 
-`make storage-test` boots disposable IDE and AHCI guests from the release
+`python3 tools/storage-test.py --x86-64` boots disposable IDE and AHCI guests from the release
 image. It checks installation boundaries, reboot persistence, offline
 filesystem integrity, disk and inode exhaustion, and injected read,
 write, directory metadata, and flush failures. The flush test accepts

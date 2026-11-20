@@ -49,7 +49,7 @@ and the set of bundled X11 clients.
 
 ## Build and source
 
-`make tinyx` builds the program with the Project9 SDK. `make release` includes
+`make` builds the program with the Project9 SDK. `make release` includes
 it in the ext2 images and base set. `/bin` remains universal in the hybrid
 image. The graphics server is installed in `/usr/X11/bin` as a stripped
 i386 ELF and runs under the x86_64 kernel's IA32 compatibility layer.

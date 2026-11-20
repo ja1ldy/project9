@@ -17,26 +17,26 @@ for the stable release.
 
 ## Build and boot
 
-From the extracted `project9` directory, use GNU Make, GCC with i386 code
-generation, binutils with `elf_i386` support, a native C compiler, Perl, and
-QEMU's x86 system emulator, Python 3.9 or later with curses, and
-e2fsprogs for creating ext2 disks. The guest links its own runtime and needs no host
-32-bit libc.
+From the source directory, use GNU Make, GCC with i386 code generation,
+binutils with `elf_i386` support, a native C compiler, Perl, Python 3.9 or
+later, and e2fsprogs with `mke2fs`, `debugfs`, and `e2fsck`. The guest links
+its own runtime and needs no host 32-bit libc. Use QEMU to boot the image
+in a virtual machine.
 
 The hybrid boot image also needs a compiler with `-m64` and a linker with
 `elf_x86_64` support. Use `make ARCH=i386` on an i386-only build
 toolchain, or set `CC64` and `LD64` to x86_64-capable tools.
 
 ```sh
-make os
+make
+qemu-system-x86_64 -m 512 -smp 2 -serial mon:stdio \
+  -drive file=build/x86_64/install.img,format=raw
 ```
 
-Use the menu to configure the filesystem, QEMU, hostname, and accounts.
-Run `make defconfig` for defaults and a single filesystem choice.
-See the [setup guide](Documentation/setup.md). Choose **Start Project9** for a fresh installation or to
-migrate an existing root disk. Build steps are labeled with their operation
-and output file. Run `make V=1`
-when you need the full tool commands and diagnostics.
+For a serial-only session, add `-display none` to the QEMU command.
+Press Ctrl+A then X to quit from QEMU's serial monitor. Run `make V=1`
+to see the full build commands. The [setup guide](Documentation/setup.md)
+covers host settings and importing an existing disk.
 
 At the boot menu, press Enter or wait three seconds. Set a root password
 at the first login prompt. Enter it again
@@ -50,10 +50,6 @@ for the FVWM desktop, `startx --fvwm xterm` to open xterm alongside FVWM,
 or `startx xterm` for a standalone terminal. X11 commands are on the
 default `PATH`. Run `tinyx --check` for the headless X11 test and see the
 [desktop guide](Documentation/desktop.md) for session configuration.
-
-For a serial-only session, use `make qemu-nox`. Use Ctrl+A then X to quit QEMU
-from its serial monitor. Add `QEMU=/path/to/qemu-system-i386` or
-`TOOLPREFIX=i686-elf-` to the Make command to select a toolchain explicitly.
 
 ## Try Project9 dev
 
@@ -69,26 +65,20 @@ cd release/dev-x86_64
 sha256sum -c SHA256SUMS
 ```
 
-The release includes a single BIOS-bootable `install.img`, base and SDK
-sets, and the component images. See the [release and installation guide](Documentation/release.md).
-Choose **Live in memory** at the loader to try Project9 without writing
-to the media. On a supported ATA or SATA disk, **Boot Project9**
-uses the ext2 root partition directly.
+Use the same release `install.img` in QEMU and on supported BIOS PCs.
+Choose **Live in memory** to boot from a BIOS-readable USB drive. On a
+supported ATA or SATA disk, **Boot Project9** uses the ext2 partition
+directly. See the [release guide](Documentation/release.md) for both workflows.
 
 | Command | Purpose |
 | --- | --- |
-| `make menuconfig` | Change build and machine settings |
-| `make defconfig` | Choose a filesystem and save the default settings |
-| `make os` | Configure accounts, import a previous installation, build or boot |
-| `make qemu` | Start QEMU with the local install image |
-| `make libc` | Build the i386 C library and SDK |
-| `make qemu-libc-test` | Boot the SDK test image |
-| `make fsck` | Check the root partition of the local install image offline |
+| `make` | Build the local boot disk and SDK |
+| `make release` | Build fresh BIOS media, distribution sets, and checksums |
+| `make clean` | Remove intermediates for the selected build profile and keep local disks and release files |
+| `make full-clean` | Remove `build/` and `release/`, including local guest disks and settings stored there |
 
-To keep accounts and files, stop the old guest and copy its `fs.img`
-into the extracted source directory. **Start Project9** imports it to
-`build/x86_64/install.img`. Shut down the guest with `poweroff` or restart it with
-`reboot`.
+Back up any guest data in `build/` before running `make full-clean`.
+Shut down the guest with `poweroff` or restart it with `reboot`.
 
 ## Documentation
 

@@ -4,8 +4,6 @@ ifdef TOP_PROGRAM
 TOP := usr/top
 TOP_OBJS := $(patsubst $(TOP)/%.c,$(BUILD)/top/%.o,$(wildcard $(TOP)/vendor/*.c $(TOP)/compat/*.c $(TOP)/*.c))
 
-.PHONY: top
-top: $(TOP_PROGRAM)
 
 $(TOP_OBJS): $(BUILD)/top/%.o: $(TOP)/%.c $(SDK)/include/.ready $(TOP)/build.mk
 	$(Q)mkdir -p $(@D)
