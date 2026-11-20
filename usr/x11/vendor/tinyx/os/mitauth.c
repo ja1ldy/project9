@@ -47,6 +47,18 @@ static struct auth {
     XID		id;
 } *mit_auth;
 
+static int
+cookie_equal(const char *a, const char *b, unsigned short length)
+{
+    volatile unsigned char diff = 0;
+    unsigned int i;
+    if ((!a || !b) && length)
+        return 0;
+    for (i = 0; i < length; ++i)
+        diff |= (unsigned char)a[i] ^ (unsigned char)b[i];
+    return diff == 0;
+}
+
 int
 MitAddCookie (
     unsigned short	data_length,
@@ -55,6 +67,8 @@ MitAddCookie (
 {
     struct auth	*new;
 
+    if (data_length != 16 || !data)
+        return 0;
     new = malloc(sizeof (struct auth));
     if (!new)
 	return 0;
@@ -82,7 +96,7 @@ MitCheckCookie (
 
     for (auth = mit_auth; auth; auth=auth->next) {
         if (data_length == auth->len &&
-	   memcmp (data, auth->data, (int) data_length) == 0)
+	   cookie_equal (data, auth->data, data_length))
 	    return auth->id;
     }
     *reason = "Invalid MIT-MAGIC-COOKIE-1 key";
@@ -112,7 +126,7 @@ MitToID (
 
     for (auth = mit_auth; auth; auth=auth->next) {
 	if (data_length == auth->len &&
-	    memcmp (data, auth->data, data_length) == 0)
+	    cookie_equal (data, auth->data, data_length))
 	    return auth->id;
     }
     return (XID) -1;
@@ -146,7 +160,7 @@ MitRemoveCookie (
     prev = 0;
     for (auth = mit_auth; auth; prev = auth, auth=auth->next) {
 	if (data_length == auth->len &&
-	    memcmp (data, auth->data, data_length) == 0)
+	    cookie_equal (data, auth->data, data_length))
  	{
 	    if (prev)
 		prev->next = auth->next;

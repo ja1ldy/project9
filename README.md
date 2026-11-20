@@ -17,6 +17,12 @@ for the stable release.
 
 ## Build and boot
 
+Builds automatically use `ccache` when it is installed and visible on the
+host `PATH`. On Alpine Linux run `apk add ccache`. Compilation results are
+cached outside the project directory, so `make clean` does not discard the
+cache. Set `CCACHE=` to disable caching for a particular invocation.
+
+
 From the source directory, use GNU Make, GCC with i386 code generation,
 binutils with `elf_i386` support, a native C compiler, Perl, Python 3.9 or
 later, and e2fsprogs with `mke2fs`, `debugfs`, and `e2fsck`. The guest links

@@ -162,6 +162,19 @@ validname(const char *name)
   return i < ACCOUNT_NAME;
 }
 
+static int
+recordvalid(const struct account_record *r, uint off)
+{
+  if(r->rounds != ROUNDS || r->name[ACCOUNT_NAME - 1] || !validname(r->name))
+    return 0;
+  if(off == BSIZE)
+    return r->uid == 0 && strncmp(r->name, ROOT_NAME, ACCOUNT_NAME) == 0;
+  if(off < 2 * BSIZE || off / BSIZE - 2 >= MAX_ACCOUNTS)
+    return 0;
+  return r->uid == FIRST_UID + off / BSIZE - 2 &&
+         strncmp(r->name, ROOT_NAME, ACCOUNT_NAME) != 0;
+}
+
 static void
 homepath(struct account_info *info, const struct account_record *r)
 {
@@ -190,11 +203,12 @@ lookup(const char *name, int uid, struct account_record *r,
   ilock(ip);
   if(ip->type != T_FILE || !(ip->flags & I_SHADOW) ||
      ip->size < BSIZE || ip->size % BSIZE ||
+     ip->size > (MAX_ACCOUNTS + 2) * BSIZE ||
      readi(ip, (char*)header, 0, BSIZE) != BSIZE)
     goto put;
   for(pos = BSIZE; pos < ip->size; pos += BSIZE){
     if(readi(ip, (char*)r, pos, BSIZE) != BSIZE ||
-       r->rounds != ROUNDS || r->name[ACCOUNT_NAME-1])
+       !recordvalid(r, pos))
       goto put;
     if((name && strncmp(name, r->name, ACCOUNT_NAME) == 0) || (!name && uid == r->uid)){
       result = 1;
@@ -217,9 +231,15 @@ saverecord(const struct account_record *r, uint off)
   struct inode *ip;
   int result = -1;
 
+  if(off < BSIZE || off % BSIZE ||
+     off > (MAX_ACCOUNTS + 1) * BSIZE || !recordvalid(r, off))
+    return -1;
   if((ip = namei(DB)) != 0){
     ilock(ip);
-    if((ip->flags & I_SHADOW) && writei(ip, (char*)r, off, BSIZE) == BSIZE)
+    if(ip->type == T_FILE && (ip->flags & I_SHADOW) &&
+       ip->size >= BSIZE && ip->size % BSIZE == 0 &&
+       ip->size <= (MAX_ACCOUNTS + 2) * BSIZE && off <= ip->size &&
+       writei(ip, (char*)r, off, BSIZE) == BSIZE)
       result = 0;
     iunlockput(ip);
   }
@@ -247,7 +267,7 @@ sys_accountinfo(void)
   uint off;
   int uid, found;
 
-  if(argint(0, &uid) < 0 || uid < 0 ||
+  if(argint(0, &uid) < 0 || uid < 0 || uid > ID_MAX ||
      argptrwrite(1, &dst, sizeof(info)) < 0)
     return -1;
   acquiresleep(&accounts);

@@ -2,6 +2,16 @@ Project9 dev bug log
 
 fixed
 
+- the authentication database accepted records with mismatched account identifiers
+  verify record names and the expected uid for each database slot
+  reject oversized and malformed account databases before hashing or saving
+
+- password changes could write a record without validating the full destination
+  require a shadow file with an aligned bounded size and the correct record slot
+
+- tinyx compared authorization cookies with an early exit
+  reject weak cookie lengths and compare every cookie byte before acceptance
+
 - tinyx could sleep in poll before dispatching requests it had just buffered
   submit client requests before dispatch and wait for the next server deadline
 
