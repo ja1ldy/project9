@@ -1,4 +1,3 @@
-<img width="868" height="287" alt="project9" src="https://github.com/user-attachments/assets/36684871-808b-4754-a91a-349ef3dc6251" />
 <!-- Project9 contributions are under ISC. See LICENSE for scope and upstream terms. -->
 
 # Project9 dev
