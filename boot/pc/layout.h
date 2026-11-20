@@ -1,0 +1,13 @@
+/* Project9 contributions are under ISC. See LICENSE for scope and upstream terms. */
+#ifndef PROJECT9_BOOT_LAYOUT_H
+#define PROJECT9_BOOT_LAYOUT_H
+
+#define BOOT_SECTOR_SIZE 512
+#define BOOT_STAGE_BLOCKS 96
+#define BOOT_KERNEL_LBA 128
+#define BOOT_DISK_BLOCKS 10000
+#define BOOT_KERNEL_MAGIC 0x4b395050
+#define BOOT_KERNEL_LIMIT 0x400000
+#define BOOT_PAYLOAD_MAX ((BOOT_DISK_BLOCKS-BOOT_KERNEL_LBA)*BOOT_SECTOR_SIZE)
+
+#endif

@@ -1,0 +1,36 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+termios - get and set terminal attributes
+
+SYNOPSIS
+    #include "termios.h"
+    int tcgetattr(int fd, struct termios *attr);
+    int tcsetattr(int fd, int action, const struct termios *attr);
+    void cfmakeraw(struct termios *attr);
+    int isatty(int fd);
+
+DESCRIPTION
+    tcgetattr reads the console's attributes. tcsetattr changes them
+    from a foreground job. TCSANOW applies changes immediately.
+    TCSADRAIN also applies immediately because console writes are
+    synchronous. TCSAFLUSH discards unread input as it applies changes.
+
+    The supported input flags are ICRNL (convert carriage return to
+    newline) and IXON (recognize flow-control keys). The supported
+    local flags are ICANON, ECHO, ISIG and IEXTEN for line editing,
+    echo, signal keys and extended editing keys.
+
+    The c_cc array holds control characters. Zero disables a control
+    character. With ICANON clear, reads return available bytes after
+    at least one arrives. VMIN must be 1 and VTIME must be 0. The
+    output and hardware control fields must be zero.
+
+    cfmakeraw adjusts the supplied settings in memory. Use tcsetattr
+    to apply them. The console settings are shared across jobs.
+    The pager can also request a temporary per-job input mode.
+
+RETURN VALUES
+    tcgetattr and tcsetattr return 0 on success or -1 on error.
+    isatty returns 1 for a console descriptor and 0 otherwise.
+
+SEE ALSO
+    stty(1), ioctl(2), ttyctl(2)

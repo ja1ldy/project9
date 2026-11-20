@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+uniq - collapse consecutive duplicate lines
+
+SYNOPSIS
+    uniq [-c] [file]
+
+DESCRIPTION
+    Read from file or standard input and output one copy of each run of
+    equal lines. Use -c to prefix that line with the number of copies. Sort
+    the input first to group copies that occur far apart.
+
+EXAMPLES
+    sort names | uniq -c
+
+SEE ALSO
+    sort(1), wc(1)

@@ -1,0 +1,22 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+shell - shell command and script syntax
+
+SYNOPSIS
+    sh file [argument ...]
+
+DESCRIPTION
+    Files use text lines and may start with #!/bin/sh. Make a script
+    executable to run it directly. Lines beginning with # are comments.
+    A backslash followed by newline continues the command.
+
+    Variable expansion is delayed until each command runs. Unquoted
+    expansion splits on spaces, tabs and newlines. Single quotes keep
+    literal text and double quotes keep an expansion in one argument.
+    A standalone quoted "$@" preserves each positional argument.
+
+EXAMPLES
+    chmod 755 ./myscript
+    ./myscript first second
+
+SEE ALSO
+    sh(1), execve(2)

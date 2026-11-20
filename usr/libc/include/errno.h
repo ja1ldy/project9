@@ -1,0 +1,37 @@
+/* Project9 contributions are under ISC. See LICENSE for scope and upstream terms. */
+
+#ifndef P9_LIBC_ERRNO_H
+#define P9_LIBC_ERRNO_H
+#include <project9/p9abi.h>
+extern int errno;
+#define EPERM P9_EPERM
+#define ENOENT P9_ENOENT
+#define EINTR P9_EINTR
+#define EIO P9_EIO
+#define EBADF P9_EBADF
+#define EAGAIN P9_EAGAIN
+#define ENOMEM P9_ENOMEM
+#define EACCES P9_EACCES
+#define EFAULT P9_EFAULT
+#define EBUSY P9_EBUSY
+#define EEXIST P9_EEXIST
+#define ENODEV P9_ENODEV
+#define ENOTDIR P9_ENOTDIR
+#define EINVAL P9_EINVAL
+#define EMFILE P9_EMFILE
+#define ENOTTY P9_ENOTTY
+#define ESPIPE P9_ESPIPE
+#define EOVERFLOW P9_EOVERFLOW
+#define ENOSPC P9_ENOSPC
+#define EPIPE P9_EPIPE
+#define ERANGE P9_ERANGE
+#define ENOSYS P9_ENOSYS
+#define ENFILE P9_ENFILE
+#define ENOTSOCK P9_ENOTSOCK
+#define EAFNOSUPPORT P9_EAFNOSUPPORT
+#define EADDRINUSE P9_EADDRINUSE
+#define EADDRNOTAVAIL P9_EADDRNOTAVAIL
+#define EISCONN P9_EISCONN
+#define ENOTCONN P9_ENOTCONN
+#define ECONNREFUSED P9_ECONNREFUSED
+#endif

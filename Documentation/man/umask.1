@@ -1,0 +1,24 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt UMASK 1
+.Os Project9
+.Sh NAME
+.Nm umask
+.Nd display or change the file creation mask
+.Sh SYNOPSIS
+.Nm
+.Op Ar octal-mask
+.Sh DESCRIPTION
+.Nm
+is a shell built-in.
+With no argument it prints the current mask.
+With an argument it sets the mask to an octal value between 000 and 777.
+The mask clears bits from mode 0666 for files and 0777 for directories.
+Children inherit the mask.
+.Sh EXAMPLES
+Set a mask for private files and directories.
+.Bd -literal -offset indent
+umask 077
+.Ed
+.Sh SEE ALSO
+.Xr chmod 1

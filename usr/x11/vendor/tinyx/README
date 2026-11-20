@@ -1,0 +1,41 @@
+TinyX
+=====
+
+TinyX is an embeddable X11 server core derived from the traditional
+DIX/MI/FB/KDrive server architecture. It provides:
+
+- a static C library with a small host-facing API in `include/tinyx.h`;
+- a memory-backed depth-24/32-bpp framebuffer with Damage reporting;
+- descriptor-free X11 client byte streams;
+- cooperative, bounded server stepping;
+- pointer and keyboard injection;
+- runtime resize, host-controlled DPI, and configurable X11 visuals;
+- built-in filesystem-free bitmap text and cursor fonts;
+- native static-library and Emscripten module targets;
+- headless C and TermX terminal reference embedders.
+
+Build
+-----
+
+    cmake -S . -B build/native -G Ninja
+    cmake --build build/native
+    ctest --test-dir build/native --output-on-failure
+
+The build requires X.Org protocol headers. See `docs/build.md` for dependency
+overrides, installation, and Emscripten instructions, and `embedders/README.md`
+for the host model and reference embedders.
+
+Scope
+-----
+
+The supported product is the embeddable memory-display server. Hardware and
+legacy native-host sources inherited from the original TinyX tree remain for
+reference but are not built.
+
+Licensing
+---------
+
+The TinyX library and TinyX-specific core changes are GPL-3.0-only. The sample
+embedders are available under either MIT or GPL-3.0-only; executables linked
+with TinyX remain subject to GPL-3.0-only. See `LICENSE.md`, `COPYING`, and
+individual source-file notices.

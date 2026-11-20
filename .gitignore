@@ -1,0 +1,19 @@
+# Build artifacts & generated images
+*.o
+*.d
+*.a
+*.so
+*.bin
+*.elf
+*.iso
+*.img
+*.qcow2
+*.tar.gz
+release/
+build/
+out/
+
+# Local tree / debug dumps & caches
+output.txt
+__pycache__/
+*.py[cod]

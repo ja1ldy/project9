@@ -1,0 +1,12 @@
+/* Project9 contributions are under ISC. See LICENSE for scope and upstream terms. */
+
+#ifndef _KDRIVE_CONFIG_H_
+#define _KDRIVE_CONFIG_H_
+
+#include <dix-config.h>
+
+#define KDRIVESERVER 1
+#define KDRIVEDDXACTIONS 1
+
+
+#endif

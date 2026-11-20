@@ -1,0 +1,8 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+formatting:
+	need to fix PAGEBREAK mechanism
+
+sh:
+	can't always runcmd in child -- breaks cd.
+	maybe should hard-code PATH=/ ?
+

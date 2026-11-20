@@ -1,0 +1,18 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+ext2 - root and data filesystem
+
+DESCRIPTION
+    The install image contains the BIOS loader and an ext2 root
+    partition. The kernel can attach that partition on ATA or AHCI
+    storage. The loader can also supply a temporary RAM copy.
+
+    An optional separate ext2 data volume mounts at /ext2 when that
+    directory is empty. A dirty root volume needs offline repair
+    before boot. A dirty data volume opens read-only.
+
+FILES
+    /       Root filesystem.
+    /ext2   Optional secondary disk.
+
+SEE ALSO
+    ls(1), poweroff(1), reboot(1), mmap(2)

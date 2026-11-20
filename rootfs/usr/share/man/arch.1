@@ -1,0 +1,14 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+NAME
+    arch - print the architecture of the running command
+
+SYNOPSIS
+    arch
+
+DESCRIPTION
+    Print i386 for the ELF32 build or x86_64 for the ELF64 build.
+    The x86_64 kernel can run ELF32 commands in compatibility mode.
+    Use sysctl hw.machine to query the kernel architecture.
+
+EXIT STATUS
+    The arch utility exits 0 on success.

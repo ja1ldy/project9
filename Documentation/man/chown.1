@@ -1,0 +1,25 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt CHOWN 1
+.Os Project9
+.Sh NAME
+.Nm chown
+.Nd change file ownership
+.Sh SYNOPSIS
+.Nm
+.Ar uid Ns Op :gid
+.Ar file ...
+.Nm
+.Ar :gid
+.Ar file ...
+.Sh DESCRIPTION
+.Nm
+sets the numeric owner and group of each file.
+Omit either ID to keep it.
+Root can assign any valid ID.
+A file owner may change the group to their own primary group.
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr chmod 1 ,
+.Xr statx 2

@@ -1,0 +1,19 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+test - evaluate a file, string or integer condition
+
+SYNOPSIS
+    test expression
+    [ expression ]
+
+DESCRIPTION
+    An empty expression is false. A single string is true if nonempty.
+    Use -e, -f, -d, -r, -w and -x for files, -n and -z for strings,
+    = and != to compare strings, and -eq, -ne, -lt, -le, -gt or -ge
+    for signed integers. A leading ! reverses a condition.
+    Exit 0 for true, 1 for false and 2 for invalid expressions.
+
+EXAMPLES
+    if [ -r "$HOME" ]; then echo readable; fi
+
+SEE ALSO
+    sh(1)

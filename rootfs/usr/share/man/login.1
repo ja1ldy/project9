@@ -1,0 +1,20 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+login - start a console session
+
+SYNOPSIS
+    login
+
+DESCRIPTION
+    Read a login name and password at the console. Password input is hidden.
+    On success, enter the user's home directory, print the message of the
+    day and start the shell with the user's IDs. Rejected sign-ins are
+    delayed.
+
+    On a fresh data disk, the startup login prompts for a root password
+    before accepting the first sign-in.
+
+FILES
+    /etc/motd    Message printed at sign-in.
+
+SEE ALSO
+    id(1), passwd(1), sh(1), useradd(1)

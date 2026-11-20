@@ -1,0 +1,28 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt SEND_SIGNAL 2
+.Os Project9
+.Sh NAME
+.Nm send_signal
+.Nd signal a process or process group
+.Sh SYNOPSIS
+.In types.h
+.In user.h
+.In signal.h
+.Ft int
+.Fn send_signal "int pid" "int sig"
+.Sh DESCRIPTION
+A positive
+.Fa pid
+selects one process, zero selects the caller's group and a value less
+than -1 selects the group whose ID is its absolute value.
+The value -1 selects eligible processes other than the caller.
+Signal 0 checks existence and permission.
+Root and processes with the same UID can send signals.
+CONT can also be sent within the same login session.
+Init is protected from delivery.
+.Sh RETURN VALUES
+The function returns 0 if it finds an eligible process, or -1 on failure.
+.Sh SEE ALSO
+.Xr kill 1 ,
+.Xr waitpid 2

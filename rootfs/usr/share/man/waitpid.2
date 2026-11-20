@@ -1,0 +1,15 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+waitpid - collect exit, stop or continue status for a child
+
+SYNOPSIS
+    int waitpid(int pid, int *status, int options);
+
+DESCRIPTION
+    A positive PID selects a child, 0 the caller's process group, -1
+    any child, and a value below -1 a group by its absolute ID.
+    WNOHANG makes the wait nonblocking. WUNTRACED reports stops and
+    WCONTINUED reports resumption. Interpret status using <wait.h>.
+    Return the child PID, 0 for no event with WNOHANG, or -1 on error.
+
+SEE ALSO
+    kill(1)

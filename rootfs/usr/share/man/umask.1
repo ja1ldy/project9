@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+umask - display or change the creation mask
+
+SYNOPSIS
+    umask [octal-mask]
+
+DESCRIPTION
+    Without a value, print the current mask. Clear masked bits when
+    creating files or directories. A child inherits its parent's mask.
+    This command is a shell built-in.
+
+EXAMPLES
+    umask 077
+
+SEE ALSO
+    chmod(1), sh(1)

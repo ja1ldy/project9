@@ -1,0 +1,6 @@
+Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+
+The OpenBSD libcurses sources reviewed were lib/libcurses/base/lib_addch.c
+and lib/libcurses/base/lib_newwin.c at openbsd/src commit
+ef146a3cfec9575b5b8b6916f791cd806a80389d. Project9 follows their public
+window, cursor, character and line semantics for its narrow ANSI subset.

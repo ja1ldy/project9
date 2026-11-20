@@ -1,0 +1,23 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+coreinfo - inspect a process core dump
+
+SYNOPSIS
+    coreinfo file ...
+
+DESCRIPTION
+    For each file, display the process ID, owner ID, signal, memory
+    size, and saved general-purpose registers. The size reported is
+    the memory payload measured in the file.
+
+    Project9 writes a private core.PID in the process's working
+    directory when it can dump a process that quits with SIGQUIT.
+    One filesystem file bounds how much of the address space can
+    be saved. A dump may contain private data from the process.
+
+EXIT STATUS
+    0   Each file contains the advertised core data.
+    1   A file is unreadable, invalid, or incomplete.
+    2   No file was supplied.
+
+SEE ALSO
+    kill(1), console(5)

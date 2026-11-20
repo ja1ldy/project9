@@ -1,0 +1,42 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+stty - display or change console settings
+
+SYNOPSIS
+    stty [-a]
+    stty size
+    stty setting ...
+
+DESCRIPTION
+    Read or change the terminal on standard input. With no operands or
+    with -a, print the size, flags and control characters. The size command
+    prints the row and column counts.
+
+    Use echo, icanon, isig, iexten, icrnl or ixon to enable a setting.
+    Prefix a flag with - to disable it. The sane setting restores the
+    default input settings. The raw setting disables line editing, echo,
+    input translation, signal keys and software flow control.
+
+    Set a control character with its name and a value. The names are
+    intr, quit, susp, eof, erase, kill, werase, rprnt, lnext, stop and
+    start. Values may be literal characters, decimal bytes, caret
+    notation such as '^C' or '^?', or undef to disable the character.
+
+    Use rows number and columns number to set the pager viewport.
+    The framebuffer bounds come from its detected geometry.
+    The VGA text console supports 80 columns and 24 rows.
+
+EXAMPLES
+    stty size
+    stty rows 20 columns 72
+    stty intr '^X'
+    stty sane
+
+    After stty raw, type stty sane followed by Ctrl+J if the serial
+    terminal sends carriage return when Enter is pressed.
+
+EXIT STATUS
+    The exit status is 0 on success, 1 on a terminal error, or 2 for
+    invalid settings or usage.
+
+SEE ALSO
+    man(1), sh(1), ioctl(2), termios(2)

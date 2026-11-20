@@ -1,0 +1,22 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+
+DeskTopSize 1x1
+WindowFont fixed
+IconFont fixed
+Style "*" ClickToFocus, BorderWidth 4, HandleWidth 5
+
+AddToFunc "InitFunction" "I" Exec exec xsetroot -solid '#253041'
++ "I" Exec exec p9term
+
+AddToMenu "Project9" "Project9" Title
++ "&Terminal" Exec exec p9term
++ "&XTerm" Exec exec xterm
++ "" Nop
++ "&End X session" Quit
+
+Mouse 1 R A Menu Project9
+Mouse 1 T A Move
+Mouse 1 S A Resize
+Mouse 1 1 A Close
+Mouse 3 T A Iconify
+Key F12 A C Menu Project9

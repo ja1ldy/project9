@@ -1,0 +1,29 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+tinyx - run an X11 session on the framebuffer
+
+SYNOPSIS
+    /usr/X11/bin/tinyx
+    /usr/X11/bin/tinyx --check
+    /usr/X11/bin/tinyx /path/to/client [argument ...]
+
+DESCRIPTION
+    Start a Tiny-X server and one client. With no arguments the
+    client draws an interactive demo. A click inside the panel or a
+    letter key changes its color. Escape ends a graphics session.
+
+    The --check option runs a headless client that paints a window
+    and reads it back through the X11 protocol.
+
+    A named client reads X11 replies and events from standard input
+    and writes raw requests to standard output. Use standard error
+    for text. The server ends when the client exits.
+
+FILES
+    /dev/fb0        32 bit screen framebuffer
+    /dev/keyboard   translated set 1 keyboard events
+    /dev/mouse      relative pointer events
+    /dev/touchpad   fallback pointer device
+    /usr/X11/COPYING  license for the server
+
+SEE ALSO
+    dev(5), tty(5)

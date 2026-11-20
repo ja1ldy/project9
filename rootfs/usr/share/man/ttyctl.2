@@ -1,0 +1,25 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+ttyctl - control console input
+
+SYNOPSIS
+    int ttyctl(int fd, int request);
+
+DESCRIPTION
+    The requests below are declared in tty.h. TTY_ISATTY checks that fd
+    refers to the system console. A mode change requires a readable console
+    descriptor.
+
+    TTY_CBREAK gives the calling foreground process immediate, unechoed
+    input. Read returns available bytes without waiting for a newline.
+    Keyboard navigation keys are encoded as escape sequences. Terminal
+    interrupt, quit, suspend and flow control keys still act on the console.
+
+    TTY_CANON releases the caller's cbreak mode. Mode ownership is suspended
+    when another job takes the foreground. The kernel releases it on exit or
+    successful exec. A forked child starts in canonical mode.
+
+RETURN VALUES
+    ttyctl returns 0 on success or -1 on error.
+
+SEE ALSO
+    man(1), sh(1), execve(2)

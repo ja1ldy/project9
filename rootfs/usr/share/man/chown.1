@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+chown - change file owner or group
+
+SYNOPSIS
+    chown uid[:gid] file ...
+    chown :gid file ...
+
+DESCRIPTION
+    Root may set any numeric UID or GID. A file owner may set its group
+    to their own primary group.
+
+EXAMPLES
+    chown :7350 /tmp/shared
+
+SEE ALSO
+    chmod(1), statx(2)

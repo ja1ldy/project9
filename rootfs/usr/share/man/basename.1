@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+basename - extract the last component of a pathname
+
+SYNOPSIS
+    basename path [suffix]
+
+DESCRIPTION
+    Strip trailing slashes and print the final component of path. The root
+    pathname produces a single slash. If suffix matches the end of the
+    result and is shorter than it, remove that suffix.
+
+EXAMPLES
+    basename /tmp/report.txt .txt prints report.
+
+SEE ALSO
+    dirname(1), pwd(1)

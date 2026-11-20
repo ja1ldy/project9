@@ -1,0 +1,27 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+ls - list directory contents
+
+SYNOPSIS
+    ls [-alh] [file ...]
+
+DESCRIPTION
+    List directory entries in filesystem order or describe a file operand.
+    With no operands, list the current directory. Directory names are
+    colored on the terminal.
+
+    -a   Include names beginning with a dot.
+    -l   Show type and permissions, link count, numeric owner and group,
+         size, and name.
+    -h   With -l, use powers of 1024 and a unit suffix for larger sizes.
+
+    Use -- to end option parsing. More than one operand can be specified.
+
+EXAMPLES
+    ls -alh /tmp /var
+
+EXIT STATUS
+    Zero on success, one when an operand cannot be listed, or two for
+    invalid options.
+
+SEE ALSO
+    chmod(1), chown(1), stat(1), statx(2)

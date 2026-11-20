@@ -1,0 +1,28 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+mmap, munmap - map memory into a process
+
+SYNOPSIS
+    void *mmap(void *addr, size_t len, int prot, int flags,
+               int fd, off_t offset);
+    int munmap(void *addr, size_t len);
+
+DESCRIPTION
+    Pass a null address to have the kernel select a free area.
+    MAP_PRIVATE maps a snapshot of a readable regular file at a
+    page-aligned offset. Use PROT_READ, with PROT_WRITE for a private
+    writable copy. A mapping stays valid after close and is copied
+    by fork. The final partial page is zero-filled beyond the file.
+
+    MAP_PRIVATE with MAP_ANONYMOUS, fd -1 and offset zero creates a
+    zero-filled private area. Each mapping can span up to 16 MiB.
+    Use munmap with the original address and length to remove it.
+
+    MAP_SHARED is available for the framebuffer device with offset
+    zero. Regular-file writeback and partial unmapping are unavailable.
+
+RETURN VALUES
+    mmap returns MAP_FAILED on error. munmap returns zero on success
+    and -1 on error.
+
+SEE ALSO
+    dev(5)

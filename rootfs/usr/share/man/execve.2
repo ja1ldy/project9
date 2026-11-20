@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+execve - replace a process image and set its environment
+
+SYNOPSIS
+    int execve(const char *path, char *const argv[],
+               char *const envp[]);
+
+DESCRIPTION
+    Both vectors end with a null pointer. argv contains the new program's
+    arguments and envp contains name=value strings. A null envp means
+    an empty environment. An executable script can specify an absolute
+    interpreter after #!, with one optional argument.
+    On success the call replaces the caller. On error it returns -1.
+
+SEE ALSO
+    sh(1), dup2(2), waitpid(2)

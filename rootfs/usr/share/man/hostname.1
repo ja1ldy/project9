@@ -1,0 +1,16 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+hostname - show or set the system name
+
+SYNOPSIS
+    hostname [name]
+
+DESCRIPTION
+    With no arguments, print the contents of /etc/hostname. If that file
+    cannot be opened, print xv6. With a name, replace the file with that
+    name and a newline. Changing the name requires root.
+
+FILES
+    /etc/hostname    Stored system name.
+
+SEE ALSO
+    login(1), sh(1)

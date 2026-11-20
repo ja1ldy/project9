@@ -1,0 +1,24 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+less - browse text a screen at a time
+
+SYNOPSIS
+    less [file ...]
+
+DESCRIPTION
+    Display each file in order. With no operands, read standard input.
+    A dash operand also reads standard input. On a terminal, the display
+    uses the console viewport. For piped input, less reads ahead as
+    needed and uses /dev/console for keys. Redirecting standard output
+    copies the input as plain text.
+
+    Down and Up or j and k move one line. Page Down or Space moves
+    forward one screen. Page Up or b moves back a screen. Home or g
+    jumps to the start. End or G reads to the end, subject to the
+    one MiB buffer. Press q to leave the current file.
+
+EXAMPLES
+    less /README /LICENSE
+    seq 100 | less
+
+SEE ALSO
+    cat(1), man(1), stty(1)

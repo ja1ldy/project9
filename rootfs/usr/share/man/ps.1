@@ -1,0 +1,21 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+ps - show process status
+
+SYNOPSIS
+    ps [pid ...]
+
+DESCRIPTION
+    Print a snapshot to standard output. With no operands, show all
+    active processes. Supply process IDs to select particular rows.
+
+    The columns are process ID, parent ID, process group, user ID,
+    group ID, state, address space size in bytes, and command name.
+    R is runnable or running, S is sleeping, T is stopped, and Z is
+    a zombie waiting to be collected.
+
+EXAMPLES
+    ps | grep sh
+    ps 1 2
+
+SEE ALSO
+    kill(1), sh(1), waitpid(2)

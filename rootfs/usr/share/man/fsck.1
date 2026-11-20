@@ -1,0 +1,23 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+fsck - check a Project9 filesystem image
+
+SYNOPSIS
+    build/fsck [image]
+    make fsck [FS_IMAGE=image]
+
+DESCRIPTION
+    Check a Project9 filesystem image from the build host. The
+    default image is fs.img. Stop the guest before checking a disk.
+
+    fsck checks the superblock, journal, inodes, directories, block
+    ownership, allocation bitmap, and link counts. It applies valid
+    committed journal records to its copy in memory. The image is
+    opened read-only.
+
+EXIT STATUS
+    0   The filesystem is clean.
+    1   The filesystem contains an inconsistency.
+    2   Usage or I/O error.
+
+SEE ALSO
+    stability(1)

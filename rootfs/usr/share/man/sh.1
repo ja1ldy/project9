@@ -1,0 +1,33 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+sh - run commands and shell scripts
+
+SYNOPSIS
+    sh [-c command [name [argument ...]]]
+    sh script [argument ...]
+
+DESCRIPTION
+    sh reads commands from a file, standard input, or the terminal.
+    Separate commands with a newline or semicolon. Use | for a pipeline,
+    && for success, || for failure, and & for a background job.
+    Parentheses run a list in a child shell.
+
+    Single quotes preserve literal text. Double quotes preserve spaces
+    and allow variable expansion. Use NAME=value, export NAME, and unset
+    NAME to manage variables. The executable search uses PATH.
+
+    Scripts support if/elif/else/fi, while or until/do/done, and
+    for name in words/do/done. Use break or continue inside a loop.
+    $0 through $9 refer to arguments, $# is the argument count, $? is the
+    last result, and $$ is the shell PID. Use "$@" to pass arguments on.
+
+    Use <, >, >> and 2> for files, and 2>&1 to copy a descriptor.
+    Built-ins include cd, umask, set, export, unset, exec, exit, jobs, fg,
+    bg, break, continue, and :. Use exec program [argument ...] to replace
+    the current shell process. Use exec with only redirections to change
+    the shell's file descriptors.
+
+EXAMPLES
+    for item in alpha beta; do echo "$item"; done
+
+SEE ALSO
+    env(1), test(1), execve(2), shell(5)

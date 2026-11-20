@@ -1,0 +1,27 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt KILL 1
+.Os Project9
+.Sh NAME
+.Nm kill
+.Nd send a signal to a process
+.Sh SYNOPSIS
+.Nm
+.Op Fl s Ar signal
+.Op Fl -
+.Ar pid ...
+.Sh DESCRIPTION
+.Nm
+sends TERM unless another signal is requested.
+The signal may be a number or a name such as
+.Cm TERM ,
+.Cm STOP
+or
+.Cm CONT .
+For negative numbers and zero, see
+.Xr send_signal 2 .
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr send_signal 2 ,
+.Xr waitpid 2

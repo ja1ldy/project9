@@ -1,0 +1,10 @@
+Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+
+The XPM was converted from the supplied Project9 logo. The xlogin
+resources use the names in OpenBSD Xenodm's config/Xresources.in.
+These source assets are ready for the display manager port. They do
+not start a greeter.
+
+The kernel still needs an authenticated local display handoff for
+non-root sessions. The upstream doas port also needs distinct real
+and effective credentials and secure set-user-ID execution.

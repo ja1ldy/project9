@@ -1,0 +1,33 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt STATX 2
+.Os Project9
+.Sh NAME
+.Nm statx ,
+.Nm fstatx
+.Nd get inode metadata and permissions
+.Sh SYNOPSIS
+.In types.h
+.In stat.h
+.In user.h
+.Ft int
+.Fn statx "const char *path" "struct statx *info"
+.Ft int
+.Fn fstatx "int fd" "struct statx *info"
+.Sh DESCRIPTION
+These functions return the original stat fields in
+.Va st
+and the inode's
+.Va uid ,
+.Va gid
+and
+.Va mode .
+.Fn statx
+requires search access along the path.
+.Fn fstatx
+takes a descriptor referring to an inode.
+.Sh RETURN VALUES
+The functions return 0 on success or -1 on failure.
+.Sh SEE ALSO
+.Xr chmod 1 ,
+.Xr chown 1

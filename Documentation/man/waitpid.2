@@ -1,0 +1,42 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt WAITPID 2
+.Os Project9
+.Sh NAME
+.Nm waitpid ,
+.Nm exitstatus
+.Nd collect child status or exit with a status code
+.Sh SYNOPSIS
+.In types.h
+.In user.h
+.In wait.h
+.Ft int
+.Fn waitpid "int pid" "int *status" "int options"
+.Ft void
+.Fn exitstatus "int status"
+.Sh DESCRIPTION
+.Fn waitpid
+collects a child event.
+A positive PID selects one child, zero the caller's process group,
+-1 any child and a value below -1 the group with that absolute ID.
+The default reports exit or termination.
+.Dv WUNTRACED
+also reports a stop, and
+.Dv WCONTINUED
+reports resumption.
+.Dv WNOHANG
+returns immediately when there is a matching child with no reportable
+event.
+Use the macros in
+.In wait.h
+to interpret the status word.
+The status pointer can be null.
+.Fn exitstatus
+ends the caller and records the low eight bits of its argument.
+.Sh RETURN VALUES
+.Fn waitpid
+returns the child PID on an event, zero for a nonblocking wait with no
+event, or -1 if the request is invalid, interrupted or has no matching
+child.
+.Sh SEE ALSO
+.Xr send_signal 2

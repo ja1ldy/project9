@@ -1,0 +1,19 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+cp - copy regular files
+
+SYNOPSIS
+    cp source target
+    cp source ... directory
+
+DESCRIPTION
+    Copy the contents of a regular file. With a directory target, use
+    the basename of each source to choose its destination. Existing
+    destination files are truncated. Source and target must have
+    different inodes. When a source fails, cp tries the remaining
+    operands.
+
+EXIT STATUS
+    Zero on success, one on a copy error, or two for invalid usage.
+
+SEE ALSO
+    cat(1), cmp(1), mv(1), umask(1)

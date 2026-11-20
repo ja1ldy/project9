@@ -1,0 +1,20 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+stability - exercise kernel resource limits
+
+SYNOPSIS
+    stability
+
+DESCRIPTION
+    Check that system calls reject invalid arguments and that
+    memory, process slots, and filesystem space are reusable after
+    exhaustion. Run in a quiet guest with a disposable disk image.
+
+FILES
+    /tmp/stability   Temporary directory for the full-disk check.
+
+EXIT STATUS
+    0   All checks passed.
+    1   A check failed.
+
+SEE ALSO
+    fsck(1)

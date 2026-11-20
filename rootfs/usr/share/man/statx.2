@@ -1,0 +1,14 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+statx - read inode metadata including mode and ownership
+
+SYNOPSIS
+    int statx(const char *path, struct statx *info);
+    int fstatx(int fd, struct statx *info);
+
+DESCRIPTION
+    Return inode metadata, including UID, GID and mode. statx searches
+    the given path. fstatx works from an open descriptor. The calls
+    return 0 on success or -1 on failure.
+
+SEE ALSO
+    chmod(1), chown(1)

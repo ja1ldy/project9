@@ -1,0 +1,17 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+cut - select fields or byte columns from text
+
+SYNOPSIS
+    cut -c list [file ...]
+    cut [-s] [-d delimiter] -f list [file ...]
+
+DESCRIPTION
+    Use a comma-separated list of numbers or ranges, starting at 1.
+    Fields use tabs by default. With -s, skip lines without the delimiter.
+    A file named - reads standard input.
+
+EXAMPLES
+    cut -d : -f 1,3 data
+
+SEE ALSO
+    paste(1), grep(1)

@@ -1,0 +1,20 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+tr - translate or delete bytes
+
+SYNOPSIS
+    tr set1 set2
+    tr -d set
+
+DESCRIPTION
+    Copy standard input to standard output. Replace each byte in set1 with
+    the byte at the corresponding position in set2. If set2 is shorter,
+    repeat its last byte as needed.
+
+    With -d, discard the bytes in set. A set consists of literal bytes and
+    ranges such as a-z.
+
+EXAMPLES
+    tr a-z A-Z < /README
+
+SEE ALSO
+    cut(1), grep(1)

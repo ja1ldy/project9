@@ -1,0 +1,24 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+console - local terminal escape sequences
+
+DESCRIPTION
+    The local display understands a subset of ANSI and VT100 sequences.
+    CSI is the escape byte followed by an opening square bracket.
+
+    CSI A B C D       Move the cursor by the given count.
+    CSI E F           Move to the start of the next or previous line.
+    CSI G d           Set column or row, numbered from one.
+    CSI H f           Set row and column, numbered from one.
+    CSI J K           Erase the display or line. Mode 0 erases toward
+                      the end, 1 toward the start, and 2 the whole area.
+    CSI s u           Save or restore the cursor position.
+    CSI ?25h ?25l     Show or hide the cursor.
+    CSI m             Select text attributes and ANSI colors.
+
+    SGR supports normal and bright ANSI foreground colors, background
+    colors, reset, bright text, and reverse video. VGA text fallback
+    uses eight background colors. The serial port sends the original
+    escape bytes for the attached terminal to interpret.
+
+SEE ALSO
+    clear(1), less(1), stty(1), dev(5)

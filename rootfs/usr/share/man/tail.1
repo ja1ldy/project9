@@ -1,0 +1,17 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+tail - print the end of buffered input
+
+SYNOPSIS
+    tail [-count] [file ...]
+
+DESCRIPTION
+    Read up to 8191 bytes from each file or, with no file operands, from
+    standard input. Print the last count lines of the bytes read. For longer
+    inputs, the result is the end of that prefix. The default count is 10.
+    Supply count as a positive decimal number preceded by a dash.
+
+EXAMPLES
+    tail -3 /README
+
+SEE ALSO
+    cat(1), head(1), wc(1)

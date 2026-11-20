@@ -1,0 +1,98 @@
+Project9 dev bug log
+
+fixed
+
+- ata flush could fail after a successful full disk test
+  the driver used a fixed count of polls for completion
+  slow host flushes could exhaust that count while the disk was busy
+  wait against the kernel timer and keep reporting real io failures
+  verify with a delayed flush and an offline ext2 check
+
+- ehci usb storage worked in qemu but initially failed on the thinkpad
+  the dma records omitted space for some extended address words
+  give the queue head and transfer descriptor separate aligned storage
+  with all high address words present and zero on this dma path
+  the thinkpad sl510 subsequently enumerated two storage devices
+
+- switching the build architecture could reuse shared output paths
+  keep kernel objects user objects staged roots disks and release sets
+  in their architecture profile
+  verify by building both profiles from the same source tree
+
+- the release checker rejected universal executables as invalid elf32
+  validate both slices inside their own bounds and check each elf class
+  keep the existing section and symbol table checks for both slices
+
+- native shell and ed lacked a runtime for restoring a saved context
+  save the x86_64 callee saved registers along with the stack and return pc
+  use a native signal return stub with the stack aligned for calls
+  verify shell syntax recovery ed error recovery and job control
+
+- the kernel tests used i386 syscall entry and pointer width assumptions
+  keep the stack probe on i386 and check wide pointer rejection on x86_64
+  read the complete flags register on each abi and compare sbrk errors
+  using a pointer sized sentinel
+
+- the tinyx host and server exceeded the project9 user stack together
+  allocate transport queues on the heap so the core can process requests
+  without hitting the stack guard page
+
+- tinyx passed its internal client capacity to project9 select
+  cap the descriptor limit at the fd set size before polling
+
+- the release check rejected ext2 executables above the old xv6 limit
+  use a per slice limit that fits the ext2 release profile
+  keep the legacy limit for images that still use the xv6 filesystem
+
+- freetype reached the guard page while loading a truetype font
+  give user programs a larger guarded stack at exec
+  verify with the bundled font and p9font --check on both kernels
+
+- sleep took ticks as its default unit and the apic timer used a fixed count
+  sleep now takes seconds and preserves tick input through the t option
+  calibrate the local apic timer against the pit on boot
+
+- clear and the pager did not behave inside p9term
+  clear through the terminal escape sequence and handle the pager form feed
+  give the foreground pager its own cbreak state on each controlling pty
+  open the matching pty for keyboard input when paging a pipe
+
+- upstream xterm had no keyboard focus when started without a window manager
+  focus the terminal when xinit starts it as the session client
+  advertise input focus to the window manager and route keys to the vt widget
+  verify by typing commands into a window away from the initial pointer
+
+- xt could not parse floating point resources through project9 sscanf
+  use strtod to read those resources on project9
+
+- enter in xterm moved downward without returning to the first column
+  translate line feeds on the pty slave when opost and onlcr are enabled
+  apply the same output rule to echoed input and preserve raw line feeds
+
+- tinyx rendered directly to mapped video memory
+  render to normal memory and copy damaged rows after each server step
+  reuse the sdk copy dispatch for long rows
+
+open
+
+- one ehci port on the thinkpad reported reset or companion routing
+  while both attached storage devices were detected
+  capture the controller and port state with the device connected
+  distinguish a failed reset from a successful companion handoff
+  then check the device on the companion controller where applicable
+
+- usertests can stop at the large sbrk allocation on a 128 mib live guest
+  the live root reserves about 32 mib and the test asks for 100 mib
+  use at least 192 mib for the full live suite or boot a disk root
+  a permanent test fix should size the large allocation using usable
+  memory while retaining a separate check for allocation rollback
+
+- disconnected usb disks consume minor slots until reboot
+  reusing a slot today would let an old open handle refer to a new disk
+  give usb handles a device generation before allowing slot reuse
+
+- exiting fvwm with two terminal clients can fault the x86_64 console shell
+  qemu reproduced it after opening xterm from the fvwm menu and leaving x
+  the fault was in the native shell variable list lookup
+  reproduce with the sse only qemu cpu and trace writes to the shell list
+  standalone xterm sessions returned to the console in the same build

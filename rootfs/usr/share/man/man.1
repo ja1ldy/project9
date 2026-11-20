@@ -1,0 +1,42 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+man - display a manual page
+
+SYNOPSIS
+    man [section] topic
+
+DESCRIPTION
+    Display the named page from /usr/share/man. With no section,
+    search sections 1, 2 and 5 in that order.
+
+    When standard input and output are the foreground console, man
+    opens a pager. The bottom line shows the current range of display
+    lines. The size is read from the console when the pager opens.
+    If either descriptor is redirected, man writes the page
+    as plain text.
+
+PAGER COMMANDS
+    Down, j, Enter      Move down one line.
+    Up, k              Move up one line.
+    Page Down, Space   Move forward one screen.
+    Page Up, b         Move back one screen.
+    Home, g            Go to the start.
+    End, G             Go to the end.
+    Ctrl+L             Redraw the screen.
+    q                  Return to the shell.
+
+    Ctrl+Z suspends the pager. Use fg to resume at the same place.
+
+FILES
+    /usr/share/man/topic.section    Installed manual page.
+
+EXAMPLES
+    man ls
+    man 2 execve
+    man ls | grep SYNOPSIS
+
+EXIT STATUS
+    The exit status is 0 on success, 1 if the page cannot be opened or
+    displayed, or 2 for invalid usage.
+
+SEE ALSO
+    apropos(1), less(1), sh(1), stty(1), ttyctl(2)

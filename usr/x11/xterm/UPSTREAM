@@ -1,0 +1,18 @@
+Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+
+Package sources
+
+xterm patch 412      https://invisible-island.net/archives/xterm/xterm-412.tgz
+libXt 1.3.1         https://www.x.org/releases/individual/lib/libXt-1.3.1.tar.xz
+libXaw 1.0.16       https://www.x.org/releases/individual/lib/libXaw-1.0.16.tar.xz
+libXmu 1.2.1        https://www.x.org/releases/individual/lib/libXmu-1.2.1.tar.xz
+libXext 1.3.6       https://www.x.org/releases/individual/lib/libXext-1.3.6.tar.xz
+libSM 1.2.6         https://www.x.org/releases/individual/lib/libSM-1.2.6.tar.xz
+libICE 1.1.2        https://www.x.org/releases/individual/lib/libICE-1.1.2.tar.xz
+
+Xterm links its Xt, Xaw, Xmu and Xext objects with the X.Org libX11 1.1.5
+port in usr/x11/fvwm/vendor/libX11. Xt uses the libSM and libICE headers
+to declare types. X session management is disabled.
+
+Xt's StringDefs.c, StringDefs.h and Shell.h come from the upstream
+makestrs generator. compat/VTparse.hin comes from xterm's VTparse.def.

@@ -1,0 +1,24 @@
+.\" Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+.Dd November 17, 2026
+.Dt CHMOD 1
+.Os Project9
+.Sh NAME
+.Nm chmod
+.Nd change file permissions
+.Sh SYNOPSIS
+.Nm
+.Ar octal-mode file ...
+.Sh DESCRIPTION
+.Nm
+sets the mode of each file.
+The three low octal digits give permissions for owner, group and other.
+Each digit is the sum of 4 for read, 2 for write and 1 for execute or search.
+The owner or root may set the mode.
+On directories, 1000 enables sticky removal checks and 2000 makes new
+entries inherit the directory's group.
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr chown 1 ,
+.Xr umask 1 ,
+.Xr statx 2

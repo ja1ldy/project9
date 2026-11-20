@@ -1,0 +1,38 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+dev - device nodes and driver interfaces
+
+DESCRIPTION
+    Init installs these character device nodes under /dev.
+
+    console    Local display and serial terminal.
+    keyboard   Raw PS/2 translated scan code events.
+    mouse      Relative PS/2 motion and button events.
+    touchpad   Relative events from a detected PS/2 Synaptics touchpad.
+    fb0        Read the visible XRGB8888 framebuffer in scanline order.
+    null       Discard writes and return end of file on read.
+    zero       Supply zero-valued bytes on read or discard writes.
+    rtc        Read the PC CMOS clock as a struct rtcdate.
+
+    The keyboard, pointer and framebuffer nodes are owned by root.
+    Opening a pointing device or framebuffer fails if the driver
+    has no corresponding hardware. Nodes survive a reboot.
+
+    The input ABI is struct input_event in devices.h. Reads return
+    complete records. INPUT_KEY stores a raw byte in code.
+    INPUT_RELATIVE stores screen-oriented x and y deltas and a button
+    bitmap with left, right and middle in bits zero through two.
+    Each input node has a shared queue and drops the oldest event
+    when it fills.
+
+    FBIOGETINFO returns width, height, byte stride and depth. Reading
+    fb0 follows the file offset and ends after the last scanline.
+    FBIOGETINFO reports width, height, byte stride and bits per
+    pixel. A process can use mmap(2) to share the pixel buffer.
+
+    KBDIOGETMODE returns KBD_MODE_SET1 for the keyboard record
+    stream. Open input devices with O_NONBLOCK to get EAGAIN
+    when the queue is empty. Use select(2) to wait for records.
+    The screen may change between reads.
+
+SEE ALSO
+    date(1), stty(1), ioctl(2), termios(2), console(5)

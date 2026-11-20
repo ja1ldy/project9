@@ -1,0 +1,13 @@
+*~
+*.o
+*.a
+*.pyc
+__pycache__/
+/build/
+/build-*/
+/build-wasm*/
+/embedders/termx/target/
+err
+*rig
+*rej
+*.tar.*

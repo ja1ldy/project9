@@ -1,0 +1,17 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+chmod - change file permissions
+
+SYNOPSIS
+    chmod octal-mode file ...
+
+DESCRIPTION
+    Use the three low digits for owner, group and other. Add 4 for read,
+    2 for write and 1 for execute or search. Only the owner and root
+    can change modes. On directories 1000 is sticky and 2000 inherits
+    group ownership for new entries.
+
+EXAMPLES
+    chmod 750 /tmp/program
+
+SEE ALSO
+    chown(1), umask(1), statx(2)

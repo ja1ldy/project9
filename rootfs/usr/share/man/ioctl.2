@@ -1,0 +1,24 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+ioctl - inspect or control a terminal descriptor
+
+SYNOPSIS
+    #include "ioctl.h"
+    int ioctl(int fd, int request, void *data);
+
+DESCRIPTION
+    The descriptor must refer to the system console. TIOCGETA and
+    TIOCSETA, TIOCSETAW, or TIOCSETAF take a pointer to struct termios.
+    See termios(2) for the corresponding library functions.
+
+    TIOCGWINSZ reads, and TIOCSWINSZ sets, the console viewport size.
+    Both take a pointer to struct winsize. The ws_row and ws_col
+    members hold rows and columns. The pixel fields read as zero.
+    Changes require a foreground caller and dimensions of at least
+    two rows and columns, within the display limits.
+
+RETURN VALUES
+    Zero on success, or -1 for an invalid descriptor, request,
+    argument, dimension, or caller.
+
+SEE ALSO
+    man(1), stty(1), termios(2), ttyctl(2)

@@ -1,0 +1,22 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+printf - write formatted text
+
+SYNOPSIS
+    printf format [argument ...]
+
+DESCRIPTION
+    The format supports %s, %d, %c and %%. It recognizes \a, \b, \f,
+    \n, \r, \t, \v and \\. Use one to three octal digits after a
+    backslash or one to two hexadecimal digits after \x to write a
+    byte. Escape sequences are interpreted in the format operand.
+
+    The format repeats while there are unused arguments and the
+    previous pass consumed an argument.
+
+EXAMPLES
+    printf '%s\n' alpha beta
+    printf '\033[31mRED\033[0m\n'
+    printf '\x1b[2J\x1b[H'
+
+SEE ALSO
+    sh(1)

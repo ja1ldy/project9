@@ -1,0 +1,28 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+select - wait for file descriptor readiness
+
+SYNOPSIS
+    #include <sys/select.h>
+
+    int select(int nfds, fd_set *readfds, fd_set *writefds,
+        fd_set *exceptfds, struct timeval *timeout);
+
+DESCRIPTION
+    Test descriptors smaller than nfds for readiness. Build sets
+    with FD_ZERO, FD_SET and FD_CLR. On return, FD_ISSET reports
+    which requested descriptors are ready.
+
+    Regular files, pipes, the console, and input devices can be
+    selected. A null timeout waits for an event or a signal.
+    A zero timeout checks readiness immediately. A positive
+    timeout is rounded up to the system clock quantum.
+
+    Project9 clears exceptfds. No device reports exceptional
+    conditions through this set.
+
+RETURN VALUES
+    The result is the number of ready bits, zero on timeout,
+    or -1 on error. A caught signal can cause EINTR.
+
+SEE ALSO
+    mmap(2), dev(5)

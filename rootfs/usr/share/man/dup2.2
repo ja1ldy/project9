@@ -1,0 +1,12 @@
+# Project9 contributions are under ISC. See LICENSE for scope and upstream terms.
+dup2 - copy a file descriptor to a specified slot
+
+SYNOPSIS
+    int dup2(int oldfd, int newfd);
+
+DESCRIPTION
+    Replace newfd with a reference to oldfd. If both refer to the same
+    descriptor, leave it in place. Return newfd or -1 on error.
+
+SEE ALSO
+    sh(1), execve(2)
