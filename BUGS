@@ -2,6 +2,24 @@ Project9 dev bug log
 
 fixed
 
+- tinyx could sleep in poll before dispatching requests it had just buffered
+  submit client requests before dispatch and wait for the next server deadline
+
+- fragmented framebuffer damage could copy a large rectangle around small updates
+  keep more damage rectangles and copy contiguous full width rows in one pass
+
+- fvwm used a button event number where the drag loop needed a release mask
+  stop coalescing motion events at the button release
+
+- p9term repainted unchanged cells when repeated enter scrolled the terminal
+  track the displayed cells and draw only changed runs
+
+- the single height vbe console recopied unchanged rows when scrolling
+  compare the text rows before copying their pixels to the framebuffer
+
+- pty writes woke readers and poll waiters for each byte
+  notify once per batch and before blocking on a full queue
+
 - release builds could publish separate architecture disks and raw components
   ship one bios disk with both kernels and keep the installer payload inside it
 

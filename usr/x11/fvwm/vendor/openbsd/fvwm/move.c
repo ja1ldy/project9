@@ -440,7 +440,7 @@ void moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width,
       if (Event.type == MotionNotify)
 	{
 	  while(XCheckMaskEvent(dpy, PointerMotionMask | ButtonMotionMask |
-				ButtonPressMask |ButtonRelease, &Event))
+				ButtonPressMask | ButtonReleaseMask, &Event))
 	    {
 	      StashEventTime(&Event);
 	      if(Event.type == ButtonRelease) break;

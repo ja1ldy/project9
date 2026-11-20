@@ -70,7 +70,8 @@ When the adapter exposes at least two screen heights, the framebuffer uses
 two mirrored copies of a circular scanline range. Scrolling clears two
 copies of the new text row and updates the hardware Y offset. It does no
 full-screen framebuffer reads on this path. The single-height fallback
-uses a bulk copy. The console also skips VGA text cursor I/O while the
+copies changed rows in bulk and leaves identical rows in place.
+The console also skips VGA text cursor I/O while the
 framebuffer is active, updates the cursor once per output batch, and the
 user runtime batches formatted writes.
 

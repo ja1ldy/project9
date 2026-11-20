@@ -179,8 +179,11 @@ present(tinyx_server *server, const struct framebuffer *fb)
   if(!count)
     return 0;
 
-  tinyx_damage_rect rects[32];
-  if(tinyx_server_take_damage(server, rects, sizeof(rects) / sizeof(*rects), &count) != TINYX_OK)
+  tinyx_damage_rect rects[256];
+  size_t capacity = sizeof(rects) / sizeof(*rects);
+  if(count < capacity)
+    capacity = count;
+  if(tinyx_server_take_damage(server, rects, capacity, &count) != TINYX_OK)
     return -1;
   for(size_t i = 0; i < count; i++){
     int64_t left = rects[i].x, top = rects[i].y;
@@ -198,12 +201,38 @@ present(tinyx_server *server, const struct framebuffer *fb)
 
     size_t start = (size_t)left * 4;
     size_t len = (size_t)(right - left) * 4;
-    for(size_t y = (size_t)top; y < (size_t)bottom; y++){
-      size_t offset = y * fb->stride + start;
-      memcpy(fb->video + offset, fb->shadow + offset, len);
+    size_t offset = (size_t)top * fb->stride + start;
+    size_t rows = bottom - top;
+    if(len == fb->stride){
+      memcpy(fb->video + offset, fb->shadow + offset, rows * len);
+    } else {
+      for(; rows; rows--, offset += fb->stride)
+        memcpy(fb->video + offset, fb->shadow + offset, len);
     }
   }
   return 0;
+}
+
+static int
+submit(tinyx_client *client, struct queue *incoming)
+{
+  if(incoming->used == incoming->end)
+    return 0;
+  size_t sent = 0;
+  tinyx_status result = tinyx_client_send(client, incoming->data + incoming->used,
+                                           incoming->end - incoming->used, &sent);
+  if(result != TINYX_OK && result != TINYX_ERROR_WOULD_BLOCK)
+    return -1;
+  incoming->used += sent;
+  return 0;
+}
+
+static int
+wait_ms(const tinyx_step_result *step, int pending)
+{
+  if(step->immediate_work || (pending && step->requests_processed))
+    return 0;
+  return step->next_timeout_ms < 20 ? step->next_timeout_ms : 20;
 }
 
 static int
@@ -228,14 +257,8 @@ pump(tinyx_server *server, tinyx_client *client, pid_t *child,
     if(waited < 0 && errno != EINTR)
       return 1;
 
-    if(incoming->used < incoming->end){
-      size_t sent = 0;
-      tinyx_status result = tinyx_client_send(client, incoming->data + incoming->used,
-                                             incoming->end - incoming->used, &sent);
-      if(result != TINYX_OK && result != TINYX_ERROR_WOULD_BLOCK)
-        return 1;
-      incoming->used += sent;
-    }
+    if(submit(client, incoming) < 0)
+      return 1;
     tinyx_step_result step;
     if(tinyx_server_step(server, 32, &step) != TINYX_OK || present(server, fb) < 0)
       return 1;
@@ -258,7 +281,7 @@ pump(tinyx_server *server, tinyx_client *client, pid_t *child,
       FD_SET(keyboard, &reading);
     if(pointer >= 0)
       FD_SET(pointer, &reading);
-    struct timeval timeout = { .tv_usec = step.immediate_work && outgoing->used == outgoing->end ? 0 : 20000 };
+    struct timeval timeout = { .tv_usec = 1000 * wait_ms(&step, incoming->used < incoming->end) };
     int ready = select(max + 1, &reading, &writing, NULL, &timeout);
     if(ready < 0 && errno != EINTR)
       return 1;
@@ -339,20 +362,11 @@ drop(struct link *c)
 }
 
 static int
-queue_x11(struct link *c)
+collect(struct link *c)
 {
-  tinyx_status status;
-  if(c->rx.used < c->rx.end){
-    size_t sent = 0;
-    status = tinyx_client_send(c->client, c->rx.data + c->rx.used,
-                               c->rx.end - c->rx.used, &sent);
-    if(status != TINYX_OK && status != TINYX_ERROR_WOULD_BLOCK)
-      return -1;
-    c->rx.used += sent;
-  }
   if(c->tx.used == c->tx.end){
     c->tx.used = c->tx.end = 0;
-    status = tinyx_client_receive(c->client, c->tx.data, sizeof(c->tx.data), &c->tx.end);
+    tinyx_status status = tinyx_client_receive(c->client, c->tx.data, sizeof(c->tx.data), &c->tx.end);
     if(status != TINYX_OK && status != TINYX_ERROR_WOULD_BLOCK)
       return -1;
   }
@@ -394,6 +408,9 @@ multiplex(tinyx_server *server, int fd, int keyboard, int pointer,
     peers[i].fd = -1;
   int result = 0;
   while(!stopping){
+    for(int i = 0; i < client_limit; i++)
+      if(peers[i].fd >= 0 && submit(peers[i].client, &peers[i].rx) < 0)
+        drop(&peers[i]);
     tinyx_step_result step;
     if(tinyx_server_step(server, 32, &step) != TINYX_OK || step.generation_finished || present(server, fb) < 0){
       result = 1;
@@ -401,15 +418,20 @@ multiplex(tinyx_server *server, int fd, int keyboard, int pointer,
     }
     struct pollfd wait[3 + client_limit] = {{fd, POLLIN, 0},
       {keyboard, POLLIN, 0}, {pointer, POLLIN, 0}};
+    int pending = 0;
     for(int i = 0; i < client_limit; i++){
       struct link *c = &peers[i];
-      if(c->fd >= 0 && queue_x11(c) < 0)
-        drop(c);
+      if(c->fd >= 0){
+        if(collect(c) < 0)
+          drop(c);
+        else
+          pending |= c->rx.used < c->rx.end;
+      }
       wait[i+3].fd = c->fd;
       wait[i+3].events = (c->rx.used == c->rx.end ? POLLIN : 0) |
                          (c->tx.used < c->tx.end ? POLLOUT : 0);
     }
-    int ready = poll(wait, 3 + client_limit, step.immediate_work ? 0 : 20);
+    int ready = poll(wait, 3 + client_limit, wait_ms(&step, pending));
     if(ready < 0 && errno != EINTR){
       result = 1;
       break;

@@ -349,7 +349,7 @@ ptyinput(struct pty *p, int c)
 int
 ptywrite(struct pty *p, int master, const char *data, int size, int nonblock)
 {
-  int n = 0, error = 0;
+  int n = 0, notified = 0, error = 0;
   acquire(&p->lock);
   while(n < size){
     if((!master && !p->master) || (master && !p->slaves && p->opened)){
@@ -359,6 +359,11 @@ ptywrite(struct pty *p, int master, const char *data, int size, int nonblock)
     int full = master ? p->edit - p->ir == in_capacity :
       out_capacity - (p->ow - p->or) < outputwidth(p, (uchar)data[n]);
     if(full){
+      if(n != notified){
+        wakeup(p);
+        selectnotify();
+        notified = n;
+      }
       if(nonblock || sleepintr(p, &p->lock) < 0){
         error = nonblock ? -P9_EAGAIN : -P9_EINTR;
         break;
@@ -369,6 +374,8 @@ ptywrite(struct pty *p, int master, const char *data, int size, int nonblock)
       ptyinput(p, (uchar)data[n++]);
     else
       output(p, (uchar)data[n++]);
+  }
+  if(n != notified){
     wakeup(p);
     selectnotify();
   }

@@ -171,11 +171,15 @@ to the display.
 
 Cooked PTYs enable `OPOST | ONLCR` by default. The slave stream turns a
 line feed into a carriage return followed by a line feed, including echo.
-Raw mode leaves line feeds untouched. Tiny-X renders to normal RAM and
-copies damage rectangles into the mapped framebuffer one row at a time.
-Idle polling makes no framebuffer copy. Large row copies use the SDK's
-cached CPUID and OS state check to select AVX, SSE or the integer fallback.
-The byte rate depends on the hardware framebuffer and its memory type.
+Raw mode leaves line feeds untouched. PTY writers notify readers at the
+end of a batch and before waiting for space. On scroll, `p9term` redraws
+only cells whose text, color, or cursor changed.
+
+Tiny-X dispatches buffered X11 requests before waiting for more input.
+It tracks small damage rectangles and copies contiguous full-width
+updates in one pass. Idle polling makes no framebuffer copy. Large
+copies use the SDK's cached CPUID and OS state check to select AVX,
+SSE or the integer fallback.
 
 ## Process monitor
 

@@ -51,6 +51,8 @@ for the FVWM desktop, `startx --fvwm xterm` to open xterm alongside FVWM,
 or `startx xterm` for a standalone terminal. X11 commands are on the
 default `PATH`. Run `tinyx --check` for the headless X11 test and see the
 [desktop guide](Documentation/desktop.md) for session configuration.
+[Interactive checks](Documentation/testing.md#check-terminal-and-window-responsiveness)
+cover held Enter and window dragging.
 
 ## Try Project9 dev
 

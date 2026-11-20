@@ -18,6 +18,7 @@ enum { Ground, Escape, Csi, String, StringEscape };
 struct cell { unsigned char ch, fg, bg; };
 struct terminal {
   struct cell cells[MaxRows][MaxCols];
+  struct cell shown[MaxRows][MaxCols];
   unsigned char dirty[MaxRows];
   int row, col, rows, cols, fg, bg, state, savedrow, savedcol, cursor;
   int param[8], count, private;
@@ -196,27 +197,55 @@ consume(unsigned c)
 }
 
 static int
+samecell(struct cell a, struct cell b)
+{
+  return a.ch == b.ch && a.fg == b.fg && a.bg == b.bg;
+}
+
+static struct cell
+displaycell(int row, int col, int cursor)
+{
+  struct cell result = term.cells[row][col];
+  if(col == cursor){
+    unsigned char fg = result.fg;
+    result.fg = result.bg;
+    result.bg = fg;
+  }
+  return result;
+}
+
+static int
 repaint(struct window *w)
 {
   for(int row = 0; row < term.rows; row++){
     if(!term.dirty[row])
       continue;
     term.dirty[row] = 0;
+    int cursor = term.cursor && row == term.row ? limit(term.col, term.cols) : -1;
+    struct cell *shown = term.shown[row];
     for(int col = 0; col < term.cols;){
-      struct cell *first = &term.cells[row][col];
-      int from = col, cursor = term.cursor && row == term.row ? limit(term.col, term.cols) : -1;
-      int invert = col == cursor;
+      struct cell first = displaycell(row, col, cursor);
+      if(samecell(first, shown[col])){
+        col++;
+        continue;
+      }
+      int from = col;
+      struct cell next = first;
       char text[MaxCols + 4] = {0};
-      do {
-        struct cell *c = &term.cells[row][col];
-        text[col++ - from] = c->ch;
-      } while(col < term.cols && col != cursor && !invert &&
-              term.cells[row][col].fg == first->fg && term.cells[row][col].bg == first->bg);
+      for(;;){
+        text[col - from] = next.ch;
+        shown[col++] = next;
+        if(col == term.cols)
+          break;
+        next = displaycell(row, col, cursor);
+        if(next.fg != first.fg || next.bg != first.bg || samecell(next, shown[col]))
+          break;
+      }
       XREQ(xChangeGCReq, gc, ChangeGC);
       gc.mask = GCForeground | GCBackground;
       gc.gc = w->gc;
       gc.length += 2;
-      uint32_t colors[] = {rgb[invert ? first->bg : first->fg], rgb[invert ? first->fg : first->bg]};
+      uint32_t colors[] = {rgb[first.fg], rgb[first.bg]};
       XREQ(xImageText8Req, draw, ImageText8);
       draw.length += XPAD(col - from)/4;
       draw.nChars = col - from;
@@ -395,8 +424,10 @@ events(struct window *w, int master)
       }
       if(event.u.u.type == MappingNotify && keymap(w) < 0)
         return 1;
-      if(event.u.u.type == Expose)
+      if(event.u.u.type == Expose){
+        memset(term.shown, 0, sizeof(term.shown));
         memset(term.dirty, 1, term.rows);
+      }
     }
     if(ready[1].revents & (POLLIN | POLLHUP)){
       unsigned char bytes[1024];

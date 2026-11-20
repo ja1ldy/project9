@@ -44,10 +44,10 @@ static uint saved_bg;
 static int saved_col, saved_row, cursor_visible = 1;
 
 static struct cell {
-  uint fg, bg;
-  uchar ch;
+  uint fg, bg, ch;
 } text[BOOT_FB_MAX_HEIGHT / CELL_H][BOOT_FB_MAX_WIDTH / CELL_W];
-static uint padding[NELEM(text)], scanline[BOOT_FB_MAX_WIDTH];
+static struct cell shown[NELEM(text)][NELEM(text[0])];
+static uint padding[NELEM(text)], shown_padding[NELEM(text)], scanline[BOOT_FB_MAX_WIDTH];
 static int repaint;
 
 void
@@ -182,6 +182,7 @@ draw(int col, int row, int ch, uint fg)
     text[row][col] = (struct cell){fg, cur_bg, ch};
     if(repaint)
       return;
+    shown[row][col] = text[row][col];
   }
   const ushort *glyph = gallant[ch - ' '];
   int py = top + row * CELL_H;
@@ -223,7 +224,11 @@ cursor(int show)
 static void
 drawrows(void)
 {
+  uint bytes = COLS * sizeof(text[0][0]);
+
   for(int row = 0; row < ROWS; row++){
+    if(padding[row] == shown_padding[row] && !memcmp(text[row], shown[row], bytes))
+      continue;
     fill(scanline, padding[row], width);
     for(int y = 0; y < CELL_H; y++){
       uint *dst = fb_mem + (row * CELL_H + y) * pitch;
@@ -239,6 +244,8 @@ drawrows(void)
       uint n = width;
       asm volatile("cld; rep movsl" : "+D"(dst), "+S"(src), "+c"(n) : : "memory");
     }
+    memmove(shown[row], text[row], bytes);
+    shown_padding[row] = padding[row];
   }
   repaint = 0;
 }
@@ -266,9 +273,13 @@ clear(void)
   fill(fb_mem, cur_bg, pitch * height * (mirror + 1));
   if(mirror)
     vbe_write(9, 0);
-  else
-    for(int row = 0; row < ROWS; row++)
+  else {
+    for(int row = 0; row < ROWS; row++){
       blankrow(row);
+      memmove(shown[row], text[row], COLS * sizeof(text[0][0]));
+      shown_padding[row] = padding[row];
+    }
+  }
   repaint = 0;
   top = cur_col = cur_row = 0;
 }
@@ -317,9 +328,13 @@ erase(int first, int last)
     cells = COLS - col;
     if(cells > last-first)
       cells = last-first;
-    if(!mirror)
-      for(int i = 0; i < cells; i++)
+    if(!mirror){
+      for(int i = 0; i < cells; i++){
         text[row][col + i] = (struct cell){cur_fg, cur_bg, ' '};
+        if(!repaint)
+          shown[row][col + i] = text[row][col + i];
+      }
+    }
     py = (top + row * CELL_H) % height;
     line = fb_mem + py * pitch + PAD_X + col * CELL_W;
     for(y = 0; !repaint && y < CELL_H; y++, line += pitch){

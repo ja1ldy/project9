@@ -53,3 +53,15 @@ results and crash diagnostics.
 9. Run `printf '\033[31mRED\033[0m\n'` in the graphical console. Only
    the word RED should appear in red. Then run `printf '\x1b[2J\x1b[H'`
    to clear the display and return the cursor to the top left.
+
+## Check terminal and window responsiveness
+
+Boot with QEMU's graphical display. At the console, hold Enter through
+several screens of prompts, then release it and run `echo ready`. Repeat
+in the terminal opened by `startx` and in `startx xterm`.
+
+In FVWM, drag a terminal by its title bar, then release it and type a
+command. The move should finish at release, uncovered areas should
+redraw, and the terminal should accept input immediately.
+Run `stability desktop` from the console for the PTY and X11
+infrastructure checks.
