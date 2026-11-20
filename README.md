@@ -5,8 +5,8 @@
 Project9 is an x86 Unix project based on xv6. The i386 kernel boots to a
 Gallant console with login, shell job control, and the UNIX V6 line
 editor ed. The x86_64 kernel runs Project9 ELF64 executables and the
-existing ELF32 userland. Every executable in the hybrid `/bin` directory
-carries both an i386 and an x86_64 slice. See [the multiarch guide](Documentation/hybrid.md)
+existing ELF32 userland. Executables in the hybrid `/bin` and `/usr/bin`
+carry both an i386 and an x86_64 slice. See [the multiarch guide](Documentation/hybrid.md)
 for the executable format and build layout.
 The [boot guide](Documentation/boot.md) covers the FreeBSD BTX boot chain
 and Project9 menu. The [terminal notes](Documentation/history/v0.4a.md) cover
@@ -38,8 +38,9 @@ Press Ctrl+A then X to quit from QEMU's serial monitor. Run `make V=1`
 to see the full build commands. The [setup guide](Documentation/setup.md)
 covers host settings and importing an existing disk.
 
-At the boot menu, press Enter or wait three seconds. Set a root password
-at the first login prompt. Enter it again
+At the boot menu, press **1** for 32-bit x86 or **3** for x86_64.
+Enter and the three-second countdown select x86_64 when available.
+Set a root password at the first login prompt. Enter it again
 when asked, then sign in as `root` with that password. The image ships without
 an account password. Use `useradd NAME` as root to create another account and
 `passwd` to change a password. Type `exit` or press Ctrl+D on an empty shell
@@ -61,14 +62,14 @@ or `seq 100 | less`. Press q to quit the pager. The `dev(5)` and
 
 ```sh
 make release
-cd release/dev-x86_64
+cd release/dev
 sha256sum -c SHA256SUMS
 ```
 
-Use the same release `install.img` in QEMU and on supported BIOS PCs.
-Choose **Live in memory** to boot from a BIOS-readable USB drive. On a
-supported ATA or SATA disk, **Boot Project9** uses the ext2 partition
-directly. See the [release guide](Documentation/release.md) for both workflows.
+Use `release/dev/install.img` for both x86 and x86_64 in QEMU or on
+supported BIOS PCs. Choose a **Live** entry for a BIOS-readable USB
+drive, or a **Disk** entry for a supported ATA or SATA disk.
+See the [release guide](Documentation/release.md) for both workflows.
 
 | Command | Purpose |
 | --- | --- |

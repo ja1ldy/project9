@@ -7,7 +7,6 @@
 #define BIOS_FLAGS 0x40000
 #define BIOS_CARRY 0x0001
 #define BIOS_ZERO  0x0040
-#define BOOT_MENU_COUNT 7
 
 enum boot_action { BOOT_DISK, BOOT_LIVE, BOOT_X86_64, BOOT_X86_64_LIVE };
 
@@ -29,12 +28,13 @@ void serial_init(void);
 void puts_serial(const char *);
 void puts_screen(const char *);
 void text_mode(void);
-int menu(void);
-int boot_video_menu(const char *const *, int);
-void boot_video_selection(const char *const *, int);
+enum boot_action menu(uint);
+int boot_video_menu(const char *const *, int, int);
+void boot_video_selection(const char *const *, int, int);
 void boot_video_status(const char *);
 uint load_kernel(uint);
 uint load_kernel64(uint);
+int boot_has_kernel64(uint);
 int long_mode_available(void);
 int boot_root(uint, int);
 int boot_hardware(void);

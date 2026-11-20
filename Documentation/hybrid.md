@@ -2,17 +2,14 @@
 
 # Project9 multiarch
 
-The default `make ARCH=x86_64 release` builds both kernels, a shared
-ext2 root, and the i386 SDK. It writes the bootable image to
-`release/dev-x86_64/install.img`. Boot options **1** and **5** select
-i386. Options **6** and **7** select x86_64. The live modes are **5**
-and **7**.
+`make release` builds both kernels, a shared ext2 root, and the i386 SDK.
+It publishes one bootable image at `release/dev/install.img`.
+Boot options **1** and **2** select x86, and **3** and **4** select x86_64.
+The live modes are **2** and **4**.
 
-`make ARCH=i386 release` produces i386 kernels and programs in
-`build/i386/` with its own release in `release/dev-i386/`. Neither
-profile writes the other profile’s build outputs, config, or local
-disk images. Use `make ARCH=i386` on an i386-only toolchain. The
-x86_64 profile can take `CC64`, `LD64`, and `OBJCOPY64` overrides.
+`make ARCH=i386` builds a local standalone i386 disk under `build/i386/`.
+Published releases always use the hybrid profile. Set `CC64`, `LD64`,
+and `OBJCOPY64` to select the 64-bit toolchain.
 
 | Paths | Architecture | Purpose |
 | --- | --- | --- |
@@ -50,28 +47,29 @@ and r9. Startup receives an aligned stack with argc, argv and envp.
 Native processes currently use the same low user virtual address
 range and fixed-width syscall structures as ELF32.
 
-The hybrid base set ships every regular `/bin` executable with both
+The hybrid base set ships every regular `/bin` and `/usr/bin` executable with both
 slices. This includes `init`, `login`, `sh`, `ed`, `man`, the installer
-utilities, and the bundled regression tests. `[` is a copy of `test`.
+utilities, `top`, `vi`, and the bundled regression tests. `[` is a copy of `test`.
 `tar` and `poweroff` resolve to the universal `pax` and `halt`.
 The build derives its command list from the same sources for both
 architectures. The release check requires both stripped slices in every
-regular `/bin` entry and checks each slice against the 64 MiB ext2 release limit.
-The standalone i386 release ships thin ELF32 programs.
+regular `/bin` and `/usr/bin` entry and checks each slice against the 64 MiB
+ext2 release limit. X11 programs use ELF32 and run in compatibility mode
+on the x86_64 kernel.
 
 Shell scripts, manuals, and configuration files are shared as-is.
 Native commands link statically with the Project9 runtime in `usr/lib/`
-and `usr/arch/x86_64/`. The NetBSD-based SDK and its separate test programs
-use the i386 ABI and run under IA32 compatibility on the x86_64 kernel.
+and `usr/arch/x86_64/`. Native `top` and `vi` also use the portable
+parts of the NetBSD libc port. The distributed SDK and its separate test
+programs use the i386 ABI and run under IA32 compatibility on the x86_64 kernel.
 Core files still use the existing 32-bit register record.
 
 ```sh
-make ARCH=x86_64 release
-make ARCH=i386 release
+make release
 python3 tools/fatpack.py mytool mytool.i386 mytool.x86_64
 ```
 
-Boot the same x86_64 release image using **5** and **7**. Run `arch`
+Boot the same release image using **2** and **4**. Run `arch`
 to see the slice selected for the process and `sysctl hw.machine`
 to see the running kernel. `ls -lah /` exercises directory reads,
 metadata, and formatted output on both paths.

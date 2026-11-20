@@ -70,8 +70,10 @@ UPROGS := $(addprefix $(BUILD)/bin/,$(USER_PROGRAMS)) $(BUILD)/bin/[
 ROOTFS := $(BUILD)/rootfs
 ifeq ($(FILESYSTEM),ext2)
 X11_SERVER := $(BUILD)/x11/tinyx
-VI_PROGRAM := $(BUILD)/vi/vi
-TOP_PROGRAM := $(BUILD)/top/top
+VI32 := $(BUILD)/vi/vi
+TOP32 := $(BUILD)/top/top
+VI_PROGRAM = $(if $(KERNEL64),$(PROFILE)/fat/vi,$(VI32))
+TOP_PROGRAM = $(if $(KERNEL64),$(PROFILE)/fat/top,$(TOP32))
 X11_APPS := $(addprefix $(BUILD)/x11/,p9term xdpyinfo xprop xwininfo xkill xrandr p9font)
 X11_UPSTREAM := $(addprefix $(BUILD)/x11-upstream/bin/,xsetroot xset xmodmap xhost xrdb xeyes xclock xinit)
 X11_STARTX := $(BUILD)/x11-upstream/bin/startx
@@ -281,10 +283,12 @@ $(WIDE)/bin/man $(WIDE)/bin/less: $(PAGER64)
 $(WIDE)/bin/sh: $(SHELL64)
 $(WIDE)/bin/sha256: $(WIDE)/userhash.o
 
+USER64_LINK = $(LD64) -m elf_x86_64 -z max-page-size=4096 --build-id=none -z noexecstack --gc-sections -s
+
 $(WIDE)/bin/%: $(WIDE)/user/%.o $(ULIB64) usr/arch/x86_64/user.ld
 	$(Q)mkdir -p $(@D)
 	$(call quiet,LD,$@)
-	$(Q)$(LD64) -m elf_x86_64 -z max-page-size=4096 --build-id=none -z noexecstack --gc-sections -s -T usr/arch/x86_64/user.ld -o $@ $(filter %.o,$^)
+	$(Q)$(USER64_LINK) -T usr/arch/x86_64/user.ld -o $@ $(filter %.o,$^)
 
 $(PROFILE)/fat/%: $(BUILD)/bin/% $(WIDE)/bin/% tools/fatpack.py
 	$(Q)mkdir -p $(@D)
@@ -326,7 +330,6 @@ E2FSCK ?= e2fsck
 DEBUGFS ?= debugfs
 
 ROOT_MIB ?= 512
-RELEASE_ROOT_MIB ?= 32
 ROOT_BLOCK ?= 1024
 ROOT_IMAGE = $(PYTHON) tools/osimage.py --size $(ROOT_MIB) --block $(ROOT_BLOCK) \
              --mke2fs "$(MKE2FS)" --e2fsck "$(E2FSCK)" --debugfs "$(DEBUGFS)" --filesystem $(FILESYSTEM)
@@ -499,9 +502,13 @@ $(BUILD)/usr/libc/vendor/%.o: usr/libc/vendor/%.c $(SDK)/include/.ready $(SDK_CO
 	$(call quiet,CC,$@)
 	$(Q)$(CC) $(SDK_CFLAGS) -Iusr/libc/compat -Os -fexcess-precision=standard -c -o $@ $<
 
-$(BUILD)/usr/libc/vendor/netbsd/gdtoa/%.o: SDK_CFLAGS += -D__HAVE_LONG_DOUBLE -DNO_FENV_H -DHonor_FLT_ROUNDS -DTrust_FLT_ROUNDS
+SDK_GDTOA_FLAGS := -D__HAVE_LONG_DOUBLE -DNO_FENV_H -DHonor_FLT_ROUNDS -DTrust_FLT_ROUNDS
+SDK_TIME_FLAGS := -include usr/libc/compat/tz_utc.h -DP9_TIME32 -DMKTIME_MIGHT_OVERFLOW=1 \
+  -DSUPPORT_POSIX2008=1 -DNETBSD_INSPIRED=1 -DHAVE_STRFTIME_L=0
+
+$(BUILD)/usr/libc/vendor/netbsd/gdtoa/%.o: SDK_CFLAGS += $(SDK_GDTOA_FLAGS)
 $(BUILD)/usr/libc/vendor/netbsd/libm/%.o: SDK_CFLAGS += -DNO_FPSETPREC
-$(BUILD)/usr/libc/vendor/netbsd/time/%.o: SDK_CFLAGS += -include usr/libc/compat/tz_utc.h -DP9_TIME32 -DSUPPORT_POSIX2008=1 -DNETBSD_INSPIRED=1 -DHAVE_STRFTIME_L=0
+$(BUILD)/usr/libc/vendor/netbsd/time/%.o: SDK_CFLAGS += $(SDK_TIME_FLAGS)
 
 $(BUILD)/usr/libc/vendor/%.o: usr/libc/vendor/%.S $(SDK_COMPAT)
 	$(Q)mkdir -p $(@D)
@@ -555,6 +562,7 @@ include usr/x11/fvwm/build.mk
 include usr/x11/xterm/build.mk
 include usr/x11/apps/build.mk
 include usr/curses/build.mk
+include usr/libc/native.mk
 include usr/top/build.mk
 
 include usr/editors/build.mk
@@ -562,13 +570,12 @@ include usr/editors/build.mk
 .PHONY: .build .force release clean full-clean
 .build: $(BOOT_IMAGE) $(DEFAULT_FS) $(SDK_FILES) $(if $(filter 1,$(SDK_TEST)),$(SDK_TEST_DISK))
 
-release: ROOT_MIB = $(RELEASE_ROOT_MIB)
-RELEASEDIR ?= release/dev-$(ARCH)
-ifeq ($(FILESYSTEM),xv6-fs)
-release:
-	$(Q)$(MAKE) FILESYSTEM=ext2 RELEASEDIR="$(RELEASEDIR)" release
-else
-release: $(SDK_FILES) $(BOOT_IMAGE) $(BUILD)/fs.factory.img
+RELEASEDIR ?= release/dev
+ifeq ($(ARCH)/$(FILESYSTEM)/$(BOOT64),x86_64/ext2/1)
+release: $(SDK_FILES) $(BOOT_IMAGE) $(ROOTFS)
 	$(call quiet,RELEASE,$(RELEASEDIR))
-	$(Q)$(PYTHON) tools/release.py "$(RELEASEDIR)" --stage "$(BUILD)" --boot "$(BOOT_IMAGE)" $(if $(KERNEL64),--universal) --mke2fs "$(MKE2FS)" --debugfs "$(DEBUGFS)" --e2fsck "$(E2FSCK)"
+	$(Q)$(PYTHON) tools/release.py "$(RELEASEDIR)" --stage "$(BUILD)" --boot "$(BOOT_IMAGE)" --mke2fs "$(MKE2FS)" --debugfs "$(DEBUGFS)" --e2fsck "$(E2FSCK)"
+else
+release:
+	$(Q)$(MAKE) ARCH=x86_64 FILESYSTEM=ext2 BOOT64=1 RELEASEDIR="$(RELEASEDIR)" release
 endif

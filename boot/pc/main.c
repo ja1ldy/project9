@@ -11,7 +11,7 @@ main(void)
   enum boot_action action;
 
   serial_init();
-  action = menu();
+  action = menu(args->bios_disk);
   text_mode();
   if(action == BOOT_X86_64 || action == BOOT_X86_64_LIVE){
     int live64 = action == BOOT_X86_64_LIVE;
@@ -31,8 +31,8 @@ main(void)
     }
     action = live64 ? BOOT_LIVE : BOOT_DISK;
   }
-  puts_screen("Loading Project9\n");
-  puts_serial("Loading Project9\n");
+  puts_screen("Loading Project9 x86\n");
+  puts_serial("Loading Project9 x86\n");
   entry = load_kernel(args->bios_disk);
   if(entry){
     if(boot_hardware() == 0){

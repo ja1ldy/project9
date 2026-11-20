@@ -61,15 +61,10 @@ def verify_elf(path, data, bits, limit=64 * 1024 * 1024):
             raise ValueError(f"{path} contains a symbol table")
 
 
-def verify_program(path, universal):
+def verify_program(path):
     data = path.read_bytes()
     if not data.startswith(b"P9FB"):
-        if universal:
-            raise ValueError(f"{path} must contain both ELF32 and ELF64 slices")
-        verify_elf(path, data, 32)
-        return
-    if not universal:
-        raise ValueError(f"{path} must be a standalone ELF32 executable")
+        raise ValueError(f"{path} must contain both ELF32 and ELF64 slices")
     if len(data) < HEADER.size:
         raise ValueError(f"{path} has a short fat header")
     _, version, start32, len32, start64, len64 = HEADER.unpack_from(data)
@@ -80,13 +75,13 @@ def verify_program(path, universal):
     verify_elf(path, data[start64:start64+len64], 64)
 
 
-def package(stage, listing, output, base, epoch, universal):
+def package(stage, listing, output, base, epoch):
     with output.open("wb") as stream, gzip.GzipFile(filename="", mode="wb", fileobj=stream, mtime=0) as packed:
         with tarfile.open(fileobj=packed, mode="w", format=tarfile.USTAR_FORMAT) as archive:
             for name, kind in sorted(listing.items()):
                 file = stage / name
-                if base and kind == "f" and name.startswith("bin/"):
-                    verify_program(file, universal)
+                if base and kind == "f" and name.startswith(("bin/", "usr/bin/")):
+                    verify_program(file)
                 elif base and kind == "f" and root_executable(name):
                     data = file.read_bytes()
                     if name == "usr/X11/bin/startx":
@@ -118,7 +113,24 @@ def digest(path):
     return h.hexdigest()
 
 
-def generate(where, stage, boot, mkfs, fsck, debugfs, universal):
+def verify_boot(boot):
+    with boot.open("rb") as disk:
+        disk.seek(127 * 512)
+        header = disk.read(20)
+        if len(header) < 20:
+            raise ValueError(f"{boot} has no boot payload header")
+        magic, size, start64, size64, size32 = struct.unpack("<5I", header)
+        if (magic != 0x4B395050 or not 52 <= size32 <= start64 or start64 % 512
+                or size64 < 64 or start64 + size64 > size
+                or 128 * 512 + size > boot.stat().st_size):
+            raise ValueError(f"{boot} must contain both kernel payloads")
+        for start, kind in ((0, b"\x01"), (start64, b"\x02")):
+            disk.seek(128 * 512 + start)
+            if disk.read(5) != b"\x7fELF" + kind:
+                raise ValueError(f"{boot} has an invalid kernel payload")
+
+
+def generate(where, stage, boot, mkfs, fsck, debugfs):
     if where.resolve() == Path.cwd() or not where.name:
         raise ValueError("choose a dedicated release directory")
     where.mkdir(parents=True, exist_ok=True)
@@ -131,9 +143,7 @@ def generate(where, stage, boot, mkfs, fsck, debugfs, universal):
             if name == "sdk":
                 expected = {path: kind for path, kind in expected.items()
                             if path != "include/.ready" and not path.endswith(".d")}
-            package(tree, expected, work / (name + ".tar.gz"), name == "base", epoch, universal)
-        shutil.copyfile(boot, work / "xv6.img")
-        shutil.copyfile(stage / "fs.factory.img", work / "fs.factory.img")
+            package(tree, expected, work / (name + ".tar.gz"), name == "base", epoch)
         with tempfile.TemporaryDirectory(prefix=".live-", dir=stage) as temporary_live:
             live = Path(temporary_live)
             root = live / "root"
@@ -143,18 +153,21 @@ def generate(where, stage, boot, mkfs, fsck, debugfs, universal):
                 motd.write("\nRAM-live installation test media. Run /install to start.\n")
             sets = root / "sets"
             sets.mkdir()
-            names = ("base.tar.gz", "sdk.tar.gz", "xv6.img")
-            for name in names:
+            archives = ("base.tar.gz", "sdk.tar.gz")
+            for name in archives:
                 shutil.copyfile(work / name, sets / name)
+            boot_payload = sets / "xv6.img"
+            shutil.copyfile(boot, boot_payload)
+            verify_boot(boot_payload)
             (sets / "SHA256SUMS").write_text("".join(
-                f"SHA256 ({name}) = {digest(sets / name)}\n" for name in names))
+                f"SHA256 ({name}) = {digest(sets / name)}\n" for name in (*archives, boot_payload.name)))
             root_image = live / "root.img"
             build_image(root_image, root, 32, 1024, mkfs, fsck, debugfs=debugfs)
-            create(work / "install.img", work / "xv6.img", root_image)
+            create(work / "install.img", boot_payload, root_image)
         checksums = "".join(f"{digest(f)}  {f.name}\n" for f in sorted(work.iterdir()))
         (work / "SHA256SUMS").write_text(checksums)
         # all inputs are checked before replacing a published file
-        for name in ("base.tar.gz", "sdk.tar.gz", "xv6.img", "fs.factory.img", "install.img", "SHA256SUMS"):
+        for name in ("base.tar.gz", "sdk.tar.gz", "install.img", "SHA256SUMS"):
             (work / name).replace(where / name)
 
 
@@ -163,12 +176,11 @@ if __name__ == "__main__":
     p.add_argument("output", type=Path)
     p.add_argument("--stage", type=Path, default=Path("build/x86_64/compat-i386"))
     p.add_argument("--boot", type=Path, default=Path("build/x86_64/xv6.img"))
-    p.add_argument("--universal", action="store_true")
     p.add_argument("--mke2fs", default="mke2fs")
     p.add_argument("--e2fsck", default="e2fsck")
     p.add_argument("--debugfs", default="debugfs")
     args = p.parse_args()
     try:
-        generate(args.output, args.stage, args.boot, args.mke2fs, args.e2fsck, args.debugfs, args.universal)
+        generate(args.output, args.stage, args.boot, args.mke2fs, args.e2fsck, args.debugfs)
     except (OSError, ValueError) as error:
         p.exit(1, f"release: {error}\n")

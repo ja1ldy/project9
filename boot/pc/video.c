@@ -1,7 +1,6 @@
 /* Project9 contributions are under ISC. See LICENSE for scope and upstream terms. */
 
 #include "loader.h"
-#include "version.h"
 #include "x86.h"
 #include "../../drivers/tty/gallant.h"
 
@@ -247,12 +246,15 @@ frame(void)
 }
 
 void
-boot_video_selection(const char *const *items, int selected)
+boot_video_selection(const char *const *items, int count, int selected)
 {
-  uint i;
+  int i;
 
-  for(i = 0; i < BOOT_MENU_COUNT; i++)
-    label(MENU_X, MENU_Y + MENU_STEP*i, items[i], i == (uint)selected ? WHITE : GRAY);
+  for(i = 0; i < count; i++){
+    int y = MENU_Y + MENU_STEP*i;
+    label(MENU_X - 2*CELL_W, y, i == selected ? ">" : " ", WHITE);
+    label(MENU_X, y, items[i], i == selected ? WHITE : GRAY);
+  }
 }
 
 void
@@ -263,7 +265,7 @@ boot_video_status(const char *message)
 }
 
 int
-boot_video_menu(const char *const *items, int selected)
+boot_video_menu(const char *const *items, int count, int selected)
 {
   const uchar *asset = _binary_menu_vga_start;
   uint i;
@@ -281,9 +283,8 @@ boot_video_menu(const char *const *items, int selected)
     return 0;
 
   frame();
-  boot_video_selection(items, selected);
-  label(MENU_X, 268, "Options:", WHITE);
-  label(MENU_X, 285, "Console: Video + serial", GRAY);
-  label(MENU_X, 302, "Kernel:  " PROJECT9_RELEASE, GRAY);
+  boot_video_selection(items, count, selected);
+  label(MENU_X, 268, "Enter boot   Space pause", GRAY);
+  label(MENU_X, 285, "Esc prompt   R reboot", GRAY);
   return !video.failed;
 }

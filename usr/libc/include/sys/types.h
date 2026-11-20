@@ -14,5 +14,9 @@ typedef uint32_t u_int32_t;
 typedef uint64_t u_int64_t;
 typedef int ssize_t, pid_t;
 typedef unsigned int uid_t, gid_t, mode_t, ino_t, dev_t, nlink_t;
+#ifdef P9_USER64
+typedef int off_t, time_t;
+#else
 typedef long off_t, time_t;
+#endif
 #endif

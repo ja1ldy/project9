@@ -6,15 +6,21 @@
 #include <unistd.h>
 
 extern int p9_result(int, int);
-extern int send_signal(int, int), sigreturn(void), sigmask(int, unsigned);
+extern int send_signal(int, int), sigmask(int, unsigned);
 extern int sigactionx(int, unsigned, void (*)(void), unsigned, unsigned *);
 
+#ifdef P9_USER64
+extern void p9_sigtramp(void);
+#else
+extern int sigreturn(void);
+
 static void
-restorer(void)
+p9_sigtramp(void)
 {
   sigreturn();
   _exit(1);
 }
+#endif
 
 int
 sigaction(int sig, const struct sigaction *action, struct sigaction *old)
@@ -25,7 +31,7 @@ sigaction(int sig, const struct sigaction *action, struct sigaction *old)
   if(action && (action->sa_flags || action->sa_handler == SIG_ERR))
     return p9_result(-1, EINVAL);
   handler = p9_result(sigactionx(sig, action ? (uintptr_t)action->sa_handler : ~0U,
-                                restorer, action ? action->sa_mask : 0, &mask), EINVAL);
+                                p9_sigtramp, action ? action->sa_mask : 0, &mask), EINVAL);
   if(handler < 0)
     return -1;
   if(old)

@@ -9,8 +9,8 @@ the shell.
 
 ## Start a session
 
-Boot `release/dev-x86_64/install.img` with a graphical display. Use option 7
-for an x86_64 RAM-live boot or option 5 for i386. Sign in as root and run
+Boot `release/dev/install.img` with a graphical display. Use option 4
+for an x86_64 RAM-live boot or option 2 for i386. Sign in as root and run
 
 ```sh
 /usr/X11/bin/tinyx --check

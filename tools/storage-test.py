@@ -94,16 +94,19 @@ class Guest:
 
     def boot(self, live=False):
         self.say("waiting for the boot menu")
-        self.see(rb"Autoboot in 3 seconds")
+        menu = self.see(rb"(?s)(1: boot|1\. x86 \(32-bit\) - Disk).*?Autoboot in 3 seconds")
+        old_keys = menu.group(1) == b"1: boot"
         self.say("starting the RAM-live guest" if live else "booting the test disk")
         if self.x86_64:
-            self.send(b"7" if live else b"6")
+            disk_key, live_key = (b"6", b"7") if old_keys else (b"3", b"4")
+            self.send(live_key if live else disk_key)
             # verify the selected kernel before checking the guest
             result = self.see(rb"Project9 x86_64 kernel|booting i386")
             if result.group() == b"booting i386":
                 raise RuntimeError(f"{self.label}: x86_64 boot fell back to i386")
         else:
-            self.send(b"5" if live else b"1")
+            live_key = b"5" if old_keys else b"2"
+            self.send(live_key if live else b"1")
         if live:
             root = self.see(rb"ext2: / read-write [^\r\n]+\r?\n")
             if not root.group().strip().endswith(b" in memory"):
@@ -496,7 +499,7 @@ def run_with_logs(args, work, keep_images):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test Project9 storage on disposable VM disks")
-    parser.add_argument("--media")
+    parser.add_argument("--media", default="release/dev/install.img")
     parser.add_argument("--qemu", help="override the QEMU executable")
     parser.add_argument("--e2fsck", default="e2fsck")
     parser.add_argument("--debugfs", default="debugfs")
@@ -514,10 +517,6 @@ if __name__ == "__main__":
         args.qemu = "qemu-system-x86_64" if args.x86_64 else "qemu-system-i386"
     if args.timeout < 1:
         parser.error("--timeout must be at least 1 second")
-    if args.media is None:
-        current = Path("release/dev-x86_64/install.img")
-        i386 = Path("release/dev-i386/install.img")
-        args.media = str(current if args.x86_64 or not i386.is_file() else i386)
     media = Path(args.media)
     try:
         if not media.is_file() or not partition(media):

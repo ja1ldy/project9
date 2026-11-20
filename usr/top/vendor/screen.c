@@ -68,7 +68,7 @@ init_termcap(int interactive)
 	screen_width = MAX_COLS;
 	screen_length = 0;
 
-	if (!interactive) {
+	if (!interactive || (interactive < 0 && !isatty(STDIN_FILENO))) {
 		/* pretend we have a dumb terminal */
 		smart_terminal = false;
 		return;

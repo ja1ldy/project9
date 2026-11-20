@@ -10,7 +10,11 @@ _start:
   movq %rdx, environ(%rip)
   call main
   movl %eax, %edi
+#ifdef P9_LIBC_START
+  call p9_exit
+#else
   call exitstatus
+#endif
   ud2
 
 /* the handler returns here with the stack aligned for the next call */

@@ -176,6 +176,22 @@ load_kernel(uint disk)
   return elf.entry;
 }
 
+static int
+payload64(uint disk, struct kernel_info *info)
+{
+  return payloads(disk, info) && info->size32 && info->size32 <= info->offset64 &&
+         info->offset64 % BOOT_SECTOR_SIZE == 0 && info->size64 >= sizeof(struct elf64) &&
+         in_file(info->offset64, info->size64, info->bytes);
+}
+
+int
+boot_has_kernel64(uint disk)
+{
+  struct kernel_info info;
+
+  return long_mode_available() && payload64(disk, &info);
+}
+
 uint
 load_kernel64(uint disk)
 {
@@ -184,9 +200,7 @@ load_kernel64(uint disk)
   struct segment64 ph[MAX_SEGMENTS];
   uint count, start = 0;
 
-  if(!payloads(disk, &info) || !info.size32 || info.size32 > info.offset64 ||
-     info.offset64 % BOOT_SECTOR_SIZE || info.size64 < sizeof(elf) ||
-     !in_file(info.offset64, info.size64, info.bytes) ||
+  if(!payload64(disk, &info) ||
      read_bytes(disk, &elf, info.offset64, sizeof(elf)) < 0 ||
      elf.magic != ELF_MAGIC || elf.ident[0] != 2 || elf.ident[1] != 1 ||
      elf.ident[2] != 1 || elf.version != 1 || elf.type != 2 || elf.machine != 62 ||

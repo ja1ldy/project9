@@ -10,24 +10,11 @@
 #define KEY_UP 0x100
 #define KEY_DOWN 0x101
 
-enum {
-  BOOT,
-  PAUSE,
-  PROMPT,
-  REBOOT,
-  LIVE,
-  LONG_MODE,
-  LONG_MODE_LIVE
-};
-
-static const char *const items[BOOT_MENU_COUNT] = {
-  "1. Boot Project9 [Enter]",
-  "2. Pause autoboot [Space]",
-  "3. Loader prompt [Esc]",
-  "4. Reboot [R]",
-  "5. Live in memory",
-  "6. Boot x86_64",
-  "7. Live x86_64"
+static const char *const items[] = {
+  [BOOT_DISK] = "1. x86 (32-bit) - Disk",
+  [BOOT_LIVE] = "2. x86 (32-bit) - Live",
+  [BOOT_X86_64] = "3. x86_64 (64-bit) - Disk",
+  [BOOT_X86_64_LIVE] = "4. x86_64 (64-bit) - Live"
 };
 
 void *
@@ -144,35 +131,34 @@ elapsed(uint start, uint now)
 }
 
 static void
-selection(int graphics, int selected)
+selection(int graphics, int count, int selected)
 {
-  uint i;
+  int i;
 
   if(graphics){
-    boot_video_selection(items, selected);
+    boot_video_selection(items, count, selected);
     return;
   }
-  for(i = 0; i < BOOT_MENU_COUNT; i++){
+  for(i = 0; i < count; i++){
     cursor(4+i, 4);
-    puts_screen(i == (uint)selected ? "> " : "  ");
+    puts_screen(i == selected ? "> " : "  ");
     puts_screen(items[i]);
   }
 }
 
 static int
-show_menu(int selected)
+show_menu(int count, int selected)
 {
-  if(boot_video_menu(items, selected))
+  if(boot_video_menu(items, count, selected))
     return 1;
 
   text_mode();
   puts_screen("  Project9\n\n"
               "  +-------- Welcome to Project9 --------+\n");
-  selection(0, selected);
-  cursor(12, 6);
-  puts_screen("Console: video + serial\n"
-              "      Kernel:  Project9\n"
-              "  +-------------------------------------+\n");
+  selection(0, count, selected);
+  cursor(9, 4);
+  puts_screen("Enter: boot   Space: pause\n"
+              "    Esc: loader prompt   R: reboot\n");
   return 0;
 }
 
@@ -237,9 +223,9 @@ loader_prompt(void)
     line[len] = 0;
     say("\n");
     if(equal(line, "boot"))
-      return 1;
+      return BOOT_DISK + 1;
     if(equal(line, "live"))
-      return 2;
+      return BOOT_LIVE + 1;
     if(equal(line, "boot64"))
       return BOOT_X86_64 + 1;
     if(equal(line, "live64"))
@@ -249,8 +235,8 @@ loader_prompt(void)
     if(equal(line, "reboot"))
       __exit();
     if(equal(line, "help"))
-      say("boot     Start Project9\n"
-          "live     Start from a temporary RAM disk\n"
+      say("boot     Start x86 from disk\n"
+          "live     Start x86 with a RAM root\n"
           "boot64   Start Project9 x86_64\n"
           "live64   Start x86_64 with a RAM root\n"
           "menu     Return to the menu\n"
@@ -261,16 +247,20 @@ loader_prompt(void)
 }
 
 static void
-serial_menu(int paused)
+serial_menu(int count, int selected, int paused)
 {
-  puts_serial(PROJECT9_RELEASE " boot menu\n"
-              "1: boot  2: pause  3: loader prompt  4: reboot  5: live  6: x86_64  7: x86_64 live\n"
-              "Enter: boot  Space: pause  Esc: prompt  R: reboot\n");
+  puts_serial(PROJECT9_RELEASE " boot menu\n");
+  for(int i = 0; i < count; i++){
+    puts_serial(i == selected ? "> " : "  ");
+    puts_serial(items[i]);
+    puts_serial("\n");
+  }
+  puts_serial("Enter: boot  Space: pause  Esc: prompt  R: reboot\n");
   puts_serial(paused ? "Autoboot paused\n" : "Autoboot in 3 seconds\n");
 }
 
-int
-menu(void)
+enum boot_action
+menu(uint disk)
 {
   const volatile uint *clock = physical(0x46c);
   static const char *const countdown[] = {
@@ -279,10 +269,13 @@ menu(void)
     "Autoboot in 3 seconds"
   };
   uint start, passed;
-  int key, paused = 0, selected = BOOT, graphics, seconds, shown = 0;
+  int wide = boot_has_kernel64(disk);
+  int count = wide ? BOOT_X86_64_LIVE + 1 : BOOT_LIVE + 1;
+  enum boot_action default_action = wide ? BOOT_X86_64 : BOOT_DISK;
+  int key, paused = 0, selected = default_action, graphics, seconds, shown = 0;
 
-  graphics = show_menu(selected);
-  serial_menu(0);
+  graphics = show_menu(count, selected);
+  serial_menu(count, selected, 0);
 
   start = *clock;
   for(;;){
@@ -290,40 +283,34 @@ menu(void)
     if(key == '\r' || key == '\n')
       key = '1' + selected;
     if(key == KEY_UP || key == KEY_DOWN){
-      selected += key == KEY_UP ? BOOT_MENU_COUNT-1 : 1;
-      selected %= BOOT_MENU_COUNT;
-      selection(graphics, selected);
+      selected += key == KEY_UP ? count-1 : 1;
+      selected %= count;
+      selection(graphics, count, selected);
       if(!paused)
-        key = '1' + PAUSE;
+        key = ' ';
     }
 
-    if(key == '1' + BOOT)
-      return BOOT_DISK;
-    if(key == '1' + LIVE)
-      return BOOT_LIVE;
-    if(key == '1' + LONG_MODE)
-      return BOOT_X86_64;
-    if(key == '1' + LONG_MODE_LIVE)
-      return BOOT_X86_64_LIVE;
-    if(key == '1' + REBOOT || key == 'r' || key == 'R')
+    if(key >= '1' && key < '1' + count)
+      return key - '1';
+    if(key == 'r' || key == 'R')
       __exit();
-    if(key == '1' + PROMPT || key == 0x1b){
+    if(key == 0x1b){
       int action = loader_prompt();
       if(action)
         return action - 1;
-      selected = BOOT;
-      graphics = show_menu(selected);
+      selected = default_action;
+      graphics = show_menu(count, selected);
       paused = 1;
       status(graphics, "Autoboot paused");
-      serial_menu(1);
-    } else if(key == '1' + PAUSE || key == ' '){
+      serial_menu(count, selected, 1);
+    } else if(key == ' '){
       paused = !paused;
       if(paused){
         status(graphics, "Autoboot paused");
         puts_serial("Autoboot paused\n");
       } else {
-        selected = BOOT;
-        selection(graphics, selected);
+        selected = default_action;
+        selection(graphics, count, selected);
         start = *clock;
         shown = 0;
         puts_serial("Autoboot resumed\n");
@@ -333,7 +320,7 @@ menu(void)
     if(!paused){
       passed = elapsed(start, *clock);
       if(passed >= AUTOBOOT_TICKS)
-        return 0;
+        return default_action;
       seconds = 3 - passed / 18;
       if(seconds != shown){
         status(graphics, countdown[seconds-1]);

@@ -2,15 +2,24 @@
 
 # BIOS boot menu
 
-Boot the [release image](release.md) to see the Project9 heading, framed
-menu and supplied logo. Use the numbered keys, or highlight an item with the arrow keys
-and press Enter. Press 5 for the RAM-live session. Moving the highlight stops the three-second countdown.
-Space pauses or resumes it. Escape opens the loader prompt and R
-restarts the machine.
+Boot the [release image](release.md) and choose a numbered entry.
 
-At the loader prompt, `boot` starts Project9, `menu` returns to the menu,
-`live` boots a temporary RAM root, `boot64` starts the x86_64 kernel,
-`live64` starts it with a RAM root, and `reboot` restarts the machine. `help` lists the commands.
+| Key | Kernel | Root |
+| --- | --- | --- |
+| **1** | x86 (32-bit) | Disk |
+| **2** | x86 (32-bit) | Live in RAM |
+| **3** | x86_64 (64-bit) | Disk |
+| **4** | x86_64 (64-bit) | Live in RAM |
+
+The default is x86_64 disk boot when the CPU and image support it.
+Otherwise the menu shows the two x86 entries and defaults to x86 disk
+boot. Use the keyboard arrows to change the selection and Enter to boot.
+Moving the selection stops the three-second countdown. Space pauses or
+resumes it. Escape opens the loader prompt and R restarts the machine.
+
+At the loader prompt, `boot` and `live` select x86, while `boot64`
+and `live64` select x86_64. Use `menu` to return, `reboot` to restart,
+or `help` to list the commands.
 `-display none -serial mon:stdio` presents the numbered keys and prompt
 over QEMU's serial console. Both the
 menu and the guest console use 9600 baud on a hardware serial connection.
@@ -53,10 +62,7 @@ loader, UEFI, and filesystem browsing are outside this port.
 
 ## Boot x86_64
 
-On a 64-bit-capable CPU, choose **6 — Boot x86_64** for a disk root or
-**7 — Live x86_64** for a RAM root. Options **1** and **5** boot i386.
-If long mode is unavailable or the ELF64 payload is invalid, the
-loader falls back to i386 in the same disk or live mode.
+If an x86_64 boot fails, the loader tries x86 in the same disk or live mode.
 
 The ELF64 kernel uses four-level paging and 64-bit interrupt
 and scheduler entry code. It shares the Project9 filesystem,
@@ -68,12 +74,12 @@ uses the original physical memory limit.
 
 ```sh
 qemu-system-x86_64 -cpu qemu64 -m 192 -smp 2 -nographic -snapshot \
-  -drive file=release/dev-x86_64/install.img,format=raw
+  -drive file=release/dev/install.img,format=raw
 ```
 
 At the shell run `sysctl hw.machine` and `sysctl hw.ncpu`. The
 x86_64 kernel reports `hw.machine=x86_64`. Run `arch` to see which
-slice ran inside the process. The default i386 kernel reports `hw.machine=i386`.
+slice ran inside the process. The 32-bit kernel reports `hw.machine=i386`.
 
 Use the disposable QEMU regression images for storage and USB tests.
 

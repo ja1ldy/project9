@@ -81,7 +81,7 @@ timeoff(struct tm *tm, long offset)
   era_day = year_in_era*365 + year_in_era/4 - year_in_era/100 + month_day;
   days = 146097LL * era + era_day + tm->tm_mday - 1 - 719468;
   seconds = 86400LL*days + 3600LL*tm->tm_hour + 60LL*tm->tm_min + tm->tm_sec - offset;
-  if(seconds < LONG_MIN || seconds > LONG_MAX)
+  if(seconds < INT_MIN || seconds > INT_MAX)
     goto overflow;
   result = seconds;
   gmtime_r(&result, tm);

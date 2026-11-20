@@ -14,14 +14,14 @@ From the source directory, run these commands. The second command creates
 a new disposable image and fails if the path already exists.
 
 ```sh
-(cd release/dev-x86_64 && sha256sum -c SHA256SUMS)
+(cd release/dev && sha256sum -c SHA256SUMS)
 python3 tools/install-target.py test-target.img
 qemu-system-i386 -m 128 -display none -serial mon:stdio \
-  -drive file=release/dev-x86_64/install.img,index=0,format=raw,snapshot=on \
+  -drive file=release/dev/install.img,index=0,format=raw,snapshot=on \
   -drive file=test-target.img,index=1,format=raw
 ```
 
-Press **5** at the boot menu. Set the temporary live-session root password
+Press **2** at the boot menu. Set the temporary live-session root password
 when prompted, sign in, and run these commands in Project9.
 
 ```sh

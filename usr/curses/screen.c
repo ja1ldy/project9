@@ -338,7 +338,8 @@ tgetent(char *buffer, const char *name)
   if(buffer)
     *buffer = 0;
   known_term = name && (!strcmp(name, "xterm") || !strcmp(name, "vt100") ||
-                         !strcmp(name, "ansi") || !strcmp(name, "xterm-256color"));
+                         !strcmp(name, "ansi") || !strcmp(name, "xterm-256color") ||
+                         !strcmp(name, "project9"));
   return known_term;
 }
 

@@ -2,6 +2,19 @@ Project9 dev bug log
 
 fixed
 
+- release builds could publish separate architecture disks and raw components
+  ship one bios disk with both kernels and keep the installer payload inside it
+
+- the boot menu mixed boot choices with loader controls and hid the default architecture
+  label disk and live entries with their bitness and default to x86_64 when available
+
+- top did not recognize the project9 console and could exit after one snapshot
+  recognize the console terminal and enable interactive refresh on both kernels
+
+- the base utilities under usr bin were built only for i386
+  build and validate both native slices of top and vi for the shared release
+  keep native libc file offsets and time records at the syscall widths
+
 - top inherited a multi second refresh interval
   sample every half second by default and keep the user supplied delay
 

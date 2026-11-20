@@ -262,7 +262,7 @@ ttyname(int fd)
 void *
 mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
 {
-  return (void *)p9_result(raw_mmap(addr, len, prot, flags, fd, off), EPERM);
+  return (void *)(intptr_t)p9_result(raw_mmap(addr, len, prot, flags, fd, off), EPERM);
 }
 
 int munmap(void *addr, size_t len) { return p9_result(raw_munmap(addr, len), EINVAL); }
@@ -298,7 +298,7 @@ nanosleep(const struct timespec *delay, struct timespec *rest)
   limit.tv_sec = delay->tv_sec;
   limit.tv_usec = (delay->tv_nsec + 999) / 1000;
   if(limit.tv_usec == 1000000){
-    if(limit.tv_sec == LONG_MAX)
+    if(limit.tv_sec == INT_MAX)
       return p9_result(-1, EINVAL);
     limit.tv_sec++;
     limit.tv_usec = 0;

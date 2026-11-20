@@ -183,14 +183,15 @@ The byte rate depends on the hardware framebuffer and its memory type.
 monitor. Its Project9 backend uses the process snapshot syscall and
 reports online CPUs, free memory and uptime. CPU usage counters and
 load averages are unavailable. Use `top -b -d 1` for one plain-text
-snapshot or `top` in a VT100-style terminal for the interactive view.
+snapshot or `top` at the Project9 console or a VT100-style terminal for
+the interactive view. The release contains native slices for both kernels.
 The default refresh interval is half a second. Use `top -s 2` to sample
 every two seconds.
 
 The SDK includes a narrow `libcurses.a` with window and cursor operations,
 basic attributes, screen updates, input and resize. It follows the public
 behavior of the relevant OpenBSD routines. The terminal database is
-limited to the built-in ANSI and VT100-compatible entries.
+limited to the built-in Project9, ANSI and VT100-compatible entries.
 
 The Project9 logo and X resource overrides for the Xenodm port are in
 `usr/x11/apps/xenodm`. The release boots to console login while the

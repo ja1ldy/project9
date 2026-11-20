@@ -8,13 +8,13 @@
 #include <string.h>
 #include <unistd.h>
 
-extern void *raw_malloc(size_t) __asm__("malloc");
-extern size_t p9_allocsize(void *);
+extern void *raw_malloc(unsigned int) __asm__("malloc");
+extern unsigned int p9_allocsize(void *);
 
 void *
 malloc(size_t n)
 {
-  void *p = raw_malloc(n);
+  void *p = n <= UINT_MAX ? raw_malloc(n) : NULL;
   if(!p)
     errno = ENOMEM;
   return p;
